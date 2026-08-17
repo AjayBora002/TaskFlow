@@ -1,16 +1,26 @@
-const { GoogleGenAI } = require('@google/genai');
+let GoogleGenAIClass = null;
 
-const getGenAI = () => {
+const getGenAI = async () => {
   const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
-  if (apiKey) {
-    return new GoogleGenAI({ apiKey });
+  if (!apiKey) return null;
+
+  try {
+    if (!GoogleGenAIClass) {
+      const mod = await import('@google/genai');
+      GoogleGenAIClass = mod.GoogleGenAI || mod.default?.GoogleGenAI;
+    }
+    if (GoogleGenAIClass) {
+      return new GoogleGenAIClass({ apiKey });
+    }
+  } catch (e) {
+    console.warn('Dynamic import of @google/genai failed or unsupported:', e.message);
   }
   return null;
 };
 
 // 1. Task Auto-Decomposer (Subtasks)
 exports.decomposeTask = async (title, description) => {
-  const ai = getGenAI();
+  const ai = await getGenAI();
   if (ai) {
     try {
       const response = await ai.models.generateContent({
@@ -70,7 +80,7 @@ Return ONLY a JSON array of strings, for example: ["Subtask 1", "Subtask 2", "Su
 
 // 2. Natural Language Command Parser (Ctrl + K)
 exports.parseNaturalLanguageCommand = async (prompt, members = []) => {
-  const ai = getGenAI();
+  const ai = await getGenAI();
   const membersList = members.map((m) => `${m.name} (${m.email})`).join(', ');
 
   if (ai) {
@@ -128,7 +138,7 @@ Return ONLY valid JSON.`,
 // 3. AI Project Risk & Bottleneck Audit (Telemetry pipeline)
 exports.auditProjectHealth = async (projectData) => {
   const { projectName, tasks, members } = projectData;
-  const ai = getGenAI();
+  const ai = await getGenAI();
 
   if (ai) {
     try {
@@ -181,7 +191,7 @@ Return ONLY a JSON object:
 
 // 4. AI Spec & Acceptance Criteria Generator
 exports.generateSpec = async (title, brief) => {
-  const ai = getGenAI();
+  const ai = await getGenAI();
   if (ai) {
     try {
       const response = await ai.models.generateContent({
@@ -220,7 +230,7 @@ Implementation spec for **${title}**.
 
 // 5. AI Daily Standup & Activity Digest
 exports.generateStandupDigest = async (projectName, recentTasks, recentComments) => {
-  const ai = getGenAI();
+  const ai = await getGenAI();
   if (ai) {
     try {
       const response = await ai.models.generateContent({
