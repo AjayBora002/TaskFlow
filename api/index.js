@@ -1,23 +1,53 @@
 const mongoose = require('mongoose');
 const app = require('../server/server');
 
-let isConnected = 0;
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
 
 async function connectDB() {
-  if (isConnected) return;
-  if (process.env.MONGO_URI) {
-    const db = await mongoose.connect(process.env.MONGO_URI, {
-      bufferCommands: false,
-    });
-    isConnected = db.connections[0].readyState;
+  if (cached.conn) {
+    return cached.conn;
   }
+
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: true,
+    };
+
+    const mongoUri = process.env.MONGO_URI;
+    if (!mongoUri) {
+      throw new Error('MONGO_URI is missing from Vercel Environment Variables.');
+    }
+
+    cached.promise = mongoose.connect(mongoUri, opts).then((mongooseInstance) => {
+      console.log('✅ Serverless MongoDB Connected');
+      return mongooseInstance;
+    });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+
+  return cached.conn;
 }
 
 module.exports = async (req, res) => {
   try {
     await connectDB();
   } catch (err) {
-    console.error('Vercel Serverless Mongo connection error:', err);
+    console.error('❌ Vercel Serverless Database Connection Error:', err.message);
+    return res.status(500).json({
+      message: 'Database connection failed on serverless backend. Please check MONGO_URI in Vercel.',
+      error: err.message,
+    });
   }
+
   return app(req, res);
 };

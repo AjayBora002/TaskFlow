@@ -14,6 +14,9 @@ const aiRoutes = require('./routes/ai');
 
 const app = express();
 
+// Trust proxy for Vercel reverse proxy rate-limiting
+app.set('trust proxy', 1);
+
 // Security Headers & Input Sanitization
 app.use(securityHeaders);
 app.use(sanitizeNoSql);
