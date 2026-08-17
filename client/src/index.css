@@ -1,56 +1,73 @@
 @import "tailwindcss";
 
 @theme {
-  --color-base: #F4F1EA;
-  --color-surface: #FCFBF8;
-  --color-surface-2: #EDE8DE;
-  --color-surface-3: #E4DEC9;
+  /* ── Ink & Slate Neutral Palette ── */
+  --color-base:      #F8FAFC;
+  --color-surface:   #FFFFFF;
+  --color-surface-2: #F1F5F9;
+  --color-surface-3: #E2E8F0;
+
+  --color-border:        #E2E8F0;
+  --color-border-subtle: #F1F5F9;
+  --color-border-bright: #CBD5E1;
+
+  --color-text-primary:   #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted:     #94A3B8;
+  --color-text-inverse:   #FFFFFF;
+
+  /* ── Confident Primary Accent (Indigo) ── */
+  --color-accent:        #4F46E5;
+  --color-accent-hover:  #4338CA;
+  --color-accent-dim:    #3730A3;
+  --color-accent-subtle: rgba(79, 70, 229, 0.08);
+
+  /* ── Distinct 4 Status Column Colors & Tints ── */
+  --color-status-todo:          #64748B;
+  --color-status-todo-bg:       #F1F5F9;
+  --color-status-todo-border:   #E2E8F0;
   
-  --color-border: #E0D9C8;
-  --color-border-subtle: #ECE6D8;
-  --color-border-bright: #C9BF0;
+  --color-status-inprogress:    #2563EB;
+  --color-status-inprogress-bg: #EFF6FF;
+  --color-status-inprogress-border: #DBEAFE;
 
-  --color-text-primary: #2C2923;
-  --color-text-secondary: #6B6557;
-  --color-text-muted: #8F8775;
-  --color-text-inverse: #FCFBF8;
+  --color-status-inreview:      #7C3AED;
+  --color-status-inreview-bg:   #F5F3FF;
+  --color-status-inreview-border: #DDD6FE;
 
-  --color-accent: #8A9054;
-  --color-accent-hover: #757B43;
-  --color-accent-dim: #626735;
-  --color-accent-subtle: rgba(138, 144, 84, 0.14);
+  --color-status-done:          #059669;
+  --color-status-done-bg:       #ECFDF5;
+  --color-status-done-border:   #A7F3D0;
 
-  --color-status-todo: #7C7769;
-  --color-status-todo-bg: rgba(124, 119, 105, 0.12);
-  --color-status-inprogress: #8A9054;
-  --color-status-inprogress-bg: rgba(138, 144, 84, 0.14);
-  --color-status-inreview: #C49147;
-  --color-status-inreview-bg: rgba(196, 145, 71, 0.14);
-  --color-status-done: #5F8F67;
-  --color-status-done-bg: rgba(95, 143, 103, 0.14);
+  /* ── 3 Distinct Priority Colors ── */
+  --color-priority-low:    #64748B;
+  --color-priority-medium: #D97706;
+  --color-priority-high:   #E11D48;
 
-  --color-priority-low: #8F8775;
-  --color-priority-medium: #C49147;
-  --color-priority-high: #C0584F;
+  --color-danger:        #E11D48;
+  --color-danger-subtle: rgba(225, 29, 72, 0.08);
 
-  --color-danger: #C0584F;
-  --color-danger-subtle: rgba(192, 88, 79, 0.12);
+  /* ── Typography Hierarchy ── */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', 'Menlo', monospace;
 
-  --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
-  --font-serif: 'Outfit', system-ui, sans-serif;
-  --font-mono: 'DM Mono', monospace;
-
-  --radius-xs: 4px;
+  /* ── Radius Hierarchy ── */
+  --radius-xs: 6px;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 20px;
 
-  --shadow-sm: 0 2px 6px rgba(44, 41, 35, 0.04);
-  --shadow-md: 0 6px 16px rgba(44, 41, 35, 0.06);
-  --shadow-lg: 0 12px 28px rgba(44, 41, 35, 0.09);
+  /* ── Elevation Shadow System ── */
+  --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 10px 25px -5px rgba(15, 23, 42, 0.10), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+  --shadow-xl: 0 20px 30px -10px rgba(15, 23, 42, 0.16);
 }
 
+/* ── Reset & Global ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
@@ -62,43 +79,37 @@ html {
 
 body {
   background-color: var(--color-base);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.03) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.03) 0px, transparent 50%);
+  background-attachment: fixed;
   color: var(--color-text-primary);
   font-family: var(--font-sans);
   line-height: 1.5;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.011em;
+}
+
+/* ── Headings Utility ── */
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
 }
 
 /* ── Scrollbars ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
 
-/* ── Focus visible ── */
+/* ── Focus Ring ── */
 :focus-visible {
   outline: 2px solid var(--color-accent);
-  outline-offset: 1px;
+  outline-offset: 2px;
   border-radius: var(--radius-xs);
 }
 :focus:not(:focus-visible) { outline: none; }
 
-/* ── Signature Task Serif Titles ── */
-.font-serif {
-  font-family: var(--font-serif);
-}
-
-/* ── Status Stripe ── */
-.status-stripe {
-  width: 4px;
-  flex-shrink: 0;
-  border-radius: 4px 0 0 4px;
-}
-.status-stripe-todo      { background: var(--color-status-todo); }
-.status-stripe-inprogress{ background: var(--color-status-inprogress); }
-.status-stripe-inreview  { background: var(--color-status-inreview); }
-.status-stripe-done      { background: var(--color-status-done); }
-
-/* ── Precision Buttons ── */
+/* ── Buttons with Active Press Micro-Interactions ── */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -109,42 +120,48 @@ body {
   font-size: 13px;
   font-weight: 600;
   border-radius: var(--radius-sm);
-  padding: 7px 14px;
-  transition: all 0.15s ease;
+  padding: 6px 13px;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
   user-select: none;
+  line-height: 1.4;
+  text-decoration: none;
 }
-.btn:active { transform: translateY(1px); }
+.btn:active {
+  transform: translateY(1px) scale(0.98);
+}
 
 .btn-primary {
   background: var(--color-accent);
-  color: #FFF;
-  border: 1px solid rgba(0,0,0,0.05);
-  box-shadow: 0 2px 4px rgba(138, 144, 84, 0.25);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 1px 3px rgba(79, 70, 229, 0.3), 0 1px 2px rgba(79, 70, 229, 0.2);
 }
 .btn-primary:hover {
   background: var(--color-accent-hover);
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.35);
 }
 
 .btn-ghost {
   background: var(--color-surface);
   color: var(--color-text-secondary);
   border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
 }
 .btn-ghost:hover {
   background: var(--color-surface-2);
-  border-color: var(--color-border-bright);
   color: var(--color-text-primary);
+  border-color: var(--color-border-bright);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-danger {
   background: var(--color-danger-subtle);
   color: var(--color-danger);
-  border: 1px solid rgba(192, 88, 79, 0.2);
+  border: 1px solid rgba(225, 29, 72, 0.15);
 }
 .btn-danger:hover {
-  background: rgba(192, 88, 79, 0.2);
+  background: rgba(225, 29, 72, 0.14);
   border-color: var(--color-danger);
 }
 
@@ -158,9 +175,16 @@ body {
   justify-content: center;
   padding: 6px;
   border-radius: var(--radius-xs);
-  transition: color 0.12s ease, background 0.12s ease;
+  transition: color 0.12s, background 0.12s, transform 0.12s;
+  line-height: 1;
 }
-.btn-icon:hover { color: var(--color-text-primary); background: var(--color-surface-2); }
+.btn-icon:hover {
+  color: var(--color-text-primary);
+  background: var(--color-surface-2);
+}
+.btn-icon:active {
+  transform: scale(0.95);
+}
 
 /* ── Form Inputs ── */
 .input {
@@ -168,88 +192,88 @@ body {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  padding: 8px 12px;
+  padding: 7px 12px;
   color: var(--color-text-primary);
   font-size: 13px;
   font-family: var(--font-sans);
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  line-height: 1.4;
+  box-shadow: var(--shadow-xs);
 }
-.input:hover { border-color: var(--color-text-muted); }
+.input:hover { border-color: var(--color-border-bright); }
 .input:focus {
   border-color: var(--color-accent);
   box-shadow: 0 0 0 3px var(--color-accent-subtle);
-  background: #FFF;
 }
 .input::placeholder { color: var(--color-text-muted); }
 
-/* ── Cards ── */
+/* ── Depth & Elevation Cards ── */
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
 }
-.card:hover {
+.card.interactive { cursor: pointer; }
+.card.interactive:hover {
   border-color: var(--color-border-bright);
   box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 /* ── Modals ── */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(44, 41, 35, 0.45);
+  background: rgba(15, 23, 42, 0.4);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 200;
-  padding: 24px;
+  padding: 20px;
 }
-
 .modal-box {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 24px;
   width: 100%;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-xl);
 }
 
-/* ── Tag Badges ── */
+/* ── Badges & Tags ── */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 3px 8px;
+  padding: 2px 7px;
   border-radius: var(--radius-xs);
   font-size: 11px;
-  font-weight: 700;
-  font-family: var(--font-mono);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  letter-spacing: 0.01em;
 }
-.badge-accent { background: var(--color-accent-subtle); color: var(--color-accent-dim); border: 1px solid rgba(138, 144, 84, 0.25); }
+.badge-accent { background: var(--color-accent-subtle); color: var(--color-accent); border: 1px solid rgba(79, 70, 229, 0.15); }
 .badge-muted  { background: var(--color-surface-2); color: var(--color-text-secondary); border: 1px solid var(--color-border); }
 
 /* ── Status Pills ── */
 .status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
+  gap: 5px;
+  padding: 3px 9px;
   border-radius: var(--radius-xs);
-  font-size: 11px;
-  font-weight: 700;
-  font-family: var(--font-mono);
-  letter-spacing: 0.03em;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-sans);
 }
-.status-todo       { background: var(--color-status-todo-bg);       color: var(--color-status-todo); }
-.status-inprogress { background: var(--color-status-inprogress-bg); color: var(--color-status-inprogress); }
-.status-inreview   { background: var(--color-status-inreview-bg);   color: var(--color-status-inreview); }
-.status-done       { background: var(--color-status-done-bg);       color: var(--color-status-done); }
+.status-todo       { background: var(--color-status-todo-bg);       color: var(--color-status-todo);       border: 1px solid var(--color-status-todo-border); }
+.status-inprogress { background: var(--color-status-inprogress-bg); color: var(--color-status-inprogress); border: 1px solid var(--color-status-inprogress-border); }
+.status-inreview   { background: var(--color-status-inreview-bg);   color: var(--color-status-inreview);   border: 1px solid var(--color-status-inreview-border); }
+.status-done       { background: var(--color-status-done-bg);       color: var(--color-status-done);       border: 1px solid var(--color-status-done-border); }
 
 /* ── Priority Dots ── */
 .priority-dot {
@@ -262,29 +286,25 @@ body {
 .priority-medium { background: var(--color-priority-medium); }
 .priority-high   { background: var(--color-priority-high); }
 
-/* ── Animations ── */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in { animation: fadeIn 0.18s ease forwards; }
-
 /* ── Field Labels ── */
 .field-label {
   display: block;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--color-text-secondary);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
   margin-bottom: 6px;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
 }
 
 /* ── Skeleton ── */
 .skeleton {
   background: var(--color-surface-2);
   border-radius: var(--radius-xs);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
 }
 
 /* ── Avatar ── */
@@ -293,30 +313,52 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-weight: 700;
   flex-shrink: 0;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-3);
-  color: var(--color-text-secondary);
+  color: #FFFFFF;
   font-size: 10px;
-}
-.avatar-accent {
-  border-color: var(--color-accent);
-  background: #D9DEB0;
-  color: var(--color-accent-dim);
+  box-shadow: 0 0 0 2px var(--color-surface);
 }
 
-/* ── Progress bar ── */
+/* ── Progress Track ── */
 .progress-track {
-  height: 6px;
-  background: var(--color-surface-2);
-  border-radius: 3px;
+  height: 4px;
+  background: #E2E8F0;
+  border-radius: 2px;
   overflow: hidden;
 }
 .progress-fill {
   height: 100%;
   background: var(--color-accent);
-  border-radius: 3px;
+  border-radius: 2px;
   transition: width 0.3s ease;
 }
+
+/* ── Micro Animations ── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in { animation: fadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-down { animation: slideDown 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.animate-scale-in { animation: scaleIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+@keyframes pulseDot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.6; }
+}
+.animate-pulse-dot { animation: pulseDot 2s ease-in-out infinite; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.animate-spin { animation: spin 0.7s linear infinite; }

@@ -1,20 +1,42 @@
 import { Link } from 'react-router-dom';
-import { format, isPast, isToday } from 'date-fns';
-import { AlertCircle, Calendar, MessageSquare, CheckSquare } from 'lucide-react';
+import { format, isPast, isToday, isTomorrow } from 'date-fns';
+import { Calendar, MessageSquare, CheckSquare, AlertCircle } from 'lucide-react';
 
-const PRIORITY_TAGS = {
-  high: { label: 'URGENT', bg: '#F5E1DF', color: '#B8453D' },
-  medium: { label: 'DESIGN', bg: '#ECE4D0', color: '#7E6D3B' },
-  low: { label: 'FEATURE', bg: '#E2E8D9', color: '#5B724D' },
+const PRIORITY_META = {
+  high:   { label: 'High',   barColor: 'var(--color-priority-high)',   tagBg: '#FFE4E6', tagColor: '#9F1239' },
+  medium: { label: 'Medium', barColor: 'var(--color-priority-medium)', tagBg: '#FEF3C7', tagColor: '#92400E' },
+  low:    { label: 'Low',    barColor: 'var(--color-priority-low)',    tagBg: '#F1F5F9', tagColor: '#475569' },
 };
 
+const AVATAR_COLORS = [
+  { bg: '#2563EB', color: '#FFFFFF' }, // Blue
+  { bg: '#059669', color: '#FFFFFF' }, // Emerald
+  { bg: '#7C3AED', color: '#FFFFFF' }, // Purple
+  { bg: '#D97706', color: '#FFFFFF' }, // Amber
+  { bg: '#DB2777', color: '#FFFFFF' }, // Pink
+  { bg: '#4F46E5', color: '#FFFFFF' }, // Indigo
+  { bg: '#0891B2', color: '#FFFFFF' }, // Cyan
+  { bg: '#EA580C', color: '#FFFFFF' }, // Orange
+];
+
+function getAvatarStyle(name) {
+  if (!name) return { background: '#94A3B8', color: '#FFFFFF' };
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % AVATAR_COLORS.length;
+  return { background: AVATAR_COLORS[index].bg, color: AVATAR_COLORS[index].color };
+}
+
 export default function TaskCard({ task, projectId, isDragging }) {
-  const isDueSoon     = task.dueDate && isToday(new Date(task.dueDate)) && task.status !== 'done';
-  const isOverdue     = task.dueDate && isPast(new Date(task.dueDate)) && task.status !== 'done';
-  const prio          = PRIORITY_TAGS[task.priority] || PRIORITY_TAGS.medium;
-  const subtasksDone  = task.subtasks?.filter(s => s.completed).length ?? 0;
+  const isOverdue = task.dueDate && isPast(new Date(task.dueDate)) && !isToday(new Date(task.dueDate)) && task.status !== 'done';
+  const isDueToday = task.dueDate && isToday(new Date(task.dueDate)) && task.status !== 'done';
+  
+  const prio = PRIORITY_META[task.priority] || PRIORITY_META.medium;
+  const subtasksDone = task.subtasks?.filter(s => s.completed).length ?? 0;
   const subtasksTotal = task.subtasks?.length ?? 0;
-  const subtaskPct    = subtasksTotal > 0 ? Math.round((subtasksDone / subtasksTotal) * 100) : 0;
+  const subtaskPct = subtasksTotal > 0 ? Math.round((subtasksDone / subtasksTotal) * 100) : 0;
 
   const getInitials = (name) =>
     name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?';
@@ -26,94 +48,86 @@ export default function TaskCard({ task, projectId, isDragging }) {
       style={{
         display: 'block',
         textDecoration: 'none',
-        background: '#FFFFFF',
-        border: `1px solid ${isDragging ? 'var(--color-accent)' : '#E6E0D2'}`,
-        borderRadius: '16px',
-        padding: '16px',
-        transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
-        boxShadow: isDragging
-          ? '0 12px 28px rgba(44, 41, 35, 0.12)'
-          : '0 2px 8px rgba(44, 41, 35, 0.03)',
-        transform: isDragging ? 'rotate(1.5deg) scale(1.02)' : 'none',
+        background: 'var(--color-surface)',
+        border: `1px solid ${isDragging ? 'var(--color-accent)' : 'var(--color-border)'}`,
+        borderRadius: 'var(--radius-md)',
+        padding: '12px 14px 12px 18px',
+        transition: 'all 0.15s cubic-bezier(0.16, 1, 0.3, 1)',
+        boxShadow: isDragging ? 'var(--shadow-xl)' : 'var(--shadow-xs)',
+        transform: isDragging ? 'rotate(2deg) scale(1.02)' : 'none',
         cursor: 'grab',
         position: 'relative',
+        overflow: 'hidden',
       }}
       onMouseEnter={e => {
         if (!isDragging) {
-          e.currentTarget.style.borderColor = '#D6CEBC';
+          e.currentTarget.style.borderColor = 'var(--color-border-bright)';
+          e.currentTarget.style.boxShadow = 'var(--shadow-md)';
           e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.boxShadow = '0 6px 16px rgba(44, 41, 35, 0.07)';
         }
       }}
       onMouseLeave={e => {
         if (!isDragging) {
-          e.currentTarget.style.borderColor = '#E6E0D2';
+          e.currentTarget.style.borderColor = 'var(--color-border)';
+          e.currentTarget.style.boxShadow = 'var(--shadow-xs)';
           e.currentTarget.style.transform = 'none';
-          e.currentTarget.style.boxShadow = '0 2px 8px rgba(44, 41, 35, 0.03)';
         }
       }}
     >
-      {/* Header row: Tag badge left, Date right */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+      {/* Priority colored left-edge bar */}
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: '4px',
+          background: prio.barColor,
+          borderRadius: '4px 0 0 4px',
+        }}
+        title={`Priority: ${prio.label}`}
+      />
+
+      {/* Priority Dot + Text Tag */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
         <span
           style={{
-            fontSize: '10px',
-            fontFamily: 'var(--font-mono)',
-            fontWeight: 700,
-            color: prio.color,
-            background: prio.bg,
-            padding: '3px 8px',
-            borderRadius: '6px',
-            letterSpacing: '0.04em',
-            textTransform: 'uppercase',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            fontSize: '11px',
+            fontWeight: 600,
+            color: prio.tagColor,
+            background: prio.tagBg,
+            padding: '1.5px 6px',
+            borderRadius: 'var(--radius-xs)',
           }}
         >
+          <span className="priority-dot" style={{ width: '6px', height: '6px', background: prio.barColor }} />
           {prio.label}
         </span>
-
-        {task.dueDate ? (
-          <span
-            style={{
-              fontSize: '11px',
-              fontFamily: 'var(--font-serif)',
-              fontStyle: 'italic',
-              color: isOverdue ? 'var(--color-danger)' : 'var(--color-text-muted)',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            {isOverdue && <AlertCircle size={10} />}
-            {format(new Date(task.dueDate), 'MMM d')}
-          </span>
-        ) : (
-          <span style={{ fontSize: '11px', fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--color-text-muted)' }}>
-            {task.status === 'inprogress' ? 'Active' : 'Pending'}
-          </span>
-        )}
       </div>
 
-      {/* Task Title (Serif) */}
+      {/* Task Title */}
       <h3
         style={{
-          margin: '0 0 8px 0',
-          fontSize: '14.5px',
+          margin: '0 0 6px 0',
+          fontSize: '13.5px',
           fontWeight: 600,
-          fontFamily: 'var(--font-serif)',
           color: 'var(--color-text-primary)',
-          lineHeight: 1.35,
-          letterSpacing: '-0.01em',
+          lineHeight: 1.4,
+          letterSpacing: '-0.005em',
         }}
       >
         {task.title}
       </h3>
 
-      {/* Optional description snippet if present */}
+      {/* Optional short description snippet */}
       {task.description && (
         <p
           style={{
-            margin: '0 0 12px 0',
-            fontSize: '11.5px',
+            margin: '0 0 10px 0',
+            fontSize: '12px',
             color: 'var(--color-text-secondary)',
             lineHeight: 1.45,
             display: '-webkit-box',
@@ -126,33 +140,52 @@ export default function TaskCard({ task, projectId, isDragging }) {
         </p>
       )}
 
-      {/* Subtasks Progress Bar (matching reference mockup) */}
+      {/* Subtask progress bar + fraction badge */}
       {subtasksTotal > 0 && (
-        <div style={{ margin: '10px 0 12px 0' }}>
-          <div className="progress-track" style={{ background: '#EAE5D8', height: '6px', borderRadius: '3px' }}>
+        <div style={{ margin: '8px 0 10px 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--color-text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+              <CheckSquare size={11} style={{ color: subtasksDone === subtasksTotal ? 'var(--color-status-done)' : 'var(--color-text-muted)' }} />
+              Subtasks
+            </span>
+            <span
+              style={{
+                fontSize: '10.5px',
+                fontWeight: 600,
+                color: subtasksDone === subtasksTotal ? 'var(--color-status-done)' : 'var(--color-text-muted)',
+                background: subtasksDone === subtasksTotal ? 'var(--color-status-done-bg)' : 'var(--color-surface-2)',
+                padding: '1px 5px',
+                borderRadius: 'var(--radius-xs)',
+              }}
+            >
+              {subtasksDone}/{subtasksTotal}
+            </span>
+          </div>
+          <div className="progress-track">
             <div
               className="progress-fill"
               style={{
                 width: `${subtaskPct}%`,
-                background: subtaskPct === 100 ? '#5F8F67' : '#8A9054',
-                height: '100%',
-                borderRadius: '3px',
+                background: subtasksDone === subtasksTotal ? 'var(--color-status-done)' : 'var(--color-accent)',
               }}
             />
           </div>
-          <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--color-text-muted)', marginTop: '4px', display: 'block' }}>
-            {subtaskPct}% COMPLETE
-          </span>
         </div>
       )}
 
-      {/* Footer row: Assignee circular overlap avatar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '-4px' }}>
+      {/* Footer row: Assignee avatar left, Comments + Due Date right */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px', paddingTop: '6px' }}>
+        {/* Assignee Avatar with deterministic color */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           {task.assignee ? (
             <div
-              className="avatar avatar-accent"
-              style={{ width: '26px', height: '26px', fontSize: '9.5px', boxShadow: '0 0 0 2px #FFF' }}
+              className="avatar"
+              style={{
+                width: '22px',
+                height: '22px',
+                fontSize: '9.5px',
+                ...getAvatarStyle(task.assignee.name),
+              }}
               title={`Assigned to ${task.assignee.name}`}
             >
               {getInitials(task.assignee.name)}
@@ -160,7 +193,7 @@ export default function TaskCard({ task, projectId, isDragging }) {
           ) : (
             <div
               className="avatar"
-              style={{ width: '26px', height: '26px', fontSize: '9.5px', background: '#ECE7DB', boxShadow: '0 0 0 2px #FFF' }}
+              style={{ width: '22px', height: '22px', fontSize: '9.5px', background: '#E2E8F0', color: '#64748B' }}
               title="Unassigned"
             >
               ?
@@ -168,11 +201,71 @@ export default function TaskCard({ task, projectId, isDragging }) {
           )}
         </div>
 
-        {task.commentsCount > 0 && (
-          <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <MessageSquare size={11} /> {task.commentsCount}
-          </span>
-        )}
+        {/* Right metadata badges */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Comment Count */}
+          {task.commentsCount > 0 && (
+            <span
+              style={{
+                fontSize: '11px',
+                color: 'var(--color-text-secondary)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px',
+                fontWeight: 500,
+              }}
+              title={`${task.commentsCount} comments`}
+            >
+              <MessageSquare size={12} style={{ color: 'var(--color-text-muted)' }} />
+              {task.commentsCount}
+            </span>
+          )}
+
+          {/* Due Date Badge */}
+          {task.dueDate && (() => {
+            const dateObj = new Date(task.dueDate);
+            const isTomorrowDate = isTomorrow(dateObj);
+            const dueLabel = isOverdue
+              ? 'Overdue'
+              : isDueToday
+              ? 'Due today'
+              : isTomorrowDate
+              ? 'Due tomorrow'
+              : format(dateObj, 'MMM d');
+
+            return (
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: isOverdue || isDueToday || isTomorrowDate ? 600 : 500,
+                  color: isOverdue
+                    ? 'var(--color-danger)'
+                    : isDueToday
+                    ? '#D97706'
+                    : isTomorrowDate
+                    ? '#2563EB'
+                    : 'var(--color-text-secondary)',
+                  background: isOverdue
+                    ? 'var(--color-danger-subtle)'
+                    : isDueToday
+                    ? '#FEF3C7'
+                    : isTomorrowDate
+                    ? '#EFF6FF'
+                    : 'var(--color-surface-2)',
+                  padding: '2px 6px',
+                  borderRadius: 'var(--radius-xs)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3.5px',
+                }}
+                title={`Due date: ${format(dateObj, 'MMM d, yyyy')}`}
+              >
+                {isOverdue ? <AlertCircle size={11} /> : <Calendar size={11} />}
+                {dueLabel}
+              </span>
+            );
+          })()}
+        </div>
       </div>
     </Link>
   );

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Plus, Settings, Users, X, UserPlus, Trash2, AlertCircle, Search, Radio } from 'lucide-react';
+import { Plus, Settings, Users, X, UserPlus, Trash2, AlertCircle, Search, Sparkles, ChevronDown, FileText, ShieldAlert, Command, ClipboardList, PlayCircle, Eye, CheckCircle2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import api from '../api/axios';
 import { socket } from '../api/socket';
@@ -12,10 +12,10 @@ import AIAuditPanel from '../components/AIAuditPanel';
 import AIDigestModal from '../components/AIDigestModal';
 
 const COLUMNS = [
-  { id: 'todo', label: 'To Do' },
-  { id: 'inprogress', label: 'In Progress' },
-  { id: 'inreview', label: 'In Review' },
-  { id: 'done', label: 'Done' },
+  { id: 'todo', label: 'To Do', icon: ClipboardList, color: 'var(--color-status-todo)', bg: 'var(--color-status-todo-bg)', border: 'var(--color-status-todo-border)', emptyTitle: 'Backlog is clear', emptyHint: 'New tasks land here. Click + to add one.' },
+  { id: 'inprogress', label: 'In Progress', icon: PlayCircle, color: 'var(--color-status-inprogress)', bg: 'var(--color-status-inprogress-bg)', border: 'var(--color-status-inprogress-border)', emptyTitle: 'Nothing active right now', emptyHint: 'Drag a task here when work begins.' },
+  { id: 'inreview', label: 'In Review', icon: Eye, color: 'var(--color-status-inreview)', bg: 'var(--color-status-inreview-bg)', border: 'var(--color-status-inreview-border)', emptyTitle: 'No pending reviews', emptyHint: 'Tasks awaiting verification appear here.' },
+  { id: 'done', label: 'Done', icon: CheckCircle2, color: 'var(--color-status-done)', bg: 'var(--color-status-done-bg)', border: 'var(--color-status-done-border)', emptyTitle: 'No completed tasks yet', emptyHint: 'Finished tasks will accumulate here.' },
 ];
 
 const VALID_TRANSITIONS = {
@@ -24,6 +24,25 @@ const VALID_TRANSITIONS = {
   inreview: ['inprogress', 'done'],
   done: ['inreview'],
 };
+
+const AVATAR_COLORS = [
+  { bg: '#2563EB', color: '#FFFFFF' },
+  { bg: '#059669', color: '#FFFFFF' },
+  { bg: '#7C3AED', color: '#FFFFFF' },
+  { bg: '#D97706', color: '#FFFFFF' },
+  { bg: '#DB2777', color: '#FFFFFF' },
+  { bg: '#4F46E5', color: '#FFFFFF' },
+];
+
+function getAvatarStyle(name) {
+  if (!name) return { background: '#94A3B8', color: '#FFFFFF' };
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % AVATAR_COLORS.length;
+  return { background: AVATAR_COLORS[index].bg, color: AVATAR_COLORS[index].color };
+}
 
 export default function ProjectBoard() {
   const { projectId } = useParams();
@@ -36,9 +55,15 @@ export default function ProjectBoard() {
   const [transitonError, setTransitionError] = useState('');
   const [activePresence, setActivePresence] = useState([]);
 
-  // Interactive Search & Priority Filter
+  // Search & Priority Filter
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('all');
+
+  // AI Menu Dropdown State
+  const [showAIMenu, setShowAIMenu] = useState(false);
+  const [openAICopilot, setOpenAICopilot] = useState(false);
+  const [openAIDigest, setOpenAIDigest] = useState(false);
+  const [openAIAudit, setOpenAIAudit] = useState(false);
 
   // Modals
   const [showNewTask, setShowNewTask] = useState(false);
@@ -57,7 +82,6 @@ export default function ProjectBoard() {
     fetchBoard();
   }, [projectId]);
 
-  // Real-time WebSockets & Presence setup
   useEffect(() => {
     if (!projectId) return;
 
@@ -65,7 +89,6 @@ export default function ProjectBoard() {
     socket.emit('join_project', { projectId, user });
 
     socket.on('presence_update', (users) => {
-      // De-duplicate presence users
       const uniqueUsers = Array.from(new Map(users.map(u => [u.email || u.id, u])).values());
       setActivePresence(uniqueUsers);
     });
@@ -117,7 +140,6 @@ export default function ProjectBoard() {
     }
   };
 
-  // Filter tasks dynamically
   const filteredTasks = tasks.filter((t) => {
     const matchesSearch = t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (t.description && t.description.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -130,63 +152,52 @@ export default function ProjectBoard() {
 
   const triggerCelebration = () => {
     confetti({
-      particleCount: 70,
+      particleCount: 60,
       spread: 60,
       origin: { y: 0.7 },
-      colors: ['#8A9054', '#5F8F67', '#C49147', '#3B82F6'],
+      colors: ['#4F46E5', '#059669', '#D97706', '#2563EB'],
     });
   };
 
   const onDragEnd = async (result) => {
-    setTransitionError('');
     const { destination, source, draggableId } = result;
     if (!destination) return;
     if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
-    const task = tasks.find((t) => t._id === draggableId);
-    if (!task) return;
+    setTransitionError('');
+    const sourceStatus = source.droppableId;
+    const destStatus = destination.droppableId;
 
-    const newStatus = destination.droppableId;
-    const oldStatus = source.droppableId;
-
-    // Client-side transition guard
-    if (newStatus !== oldStatus) {
-      const allowed = VALID_TRANSITIONS[oldStatus] || [];
-      if (!allowed.includes(newStatus)) {
-        const statusLabel = (s) => COLUMNS.find((c) => c.id === s)?.label || s;
-        setTransitionError(`Cannot jump task from "${statusLabel(oldStatus)}" to "${statusLabel(newStatus)}". Tasks must advance step-by-step.`);
+    if (sourceStatus !== destStatus) {
+      const allowed = VALID_TRANSITIONS[sourceStatus];
+      if (!allowed || !allowed.includes(destStatus)) {
+        const fromLabel = COLUMNS.find((c) => c.id === sourceStatus)?.label;
+        const toLabel = COLUMNS.find((c) => c.id === destStatus)?.label;
+        setTransitionError(`Invalid transition: Tasks in "${fromLabel}" cannot move directly to "${toLabel}".`);
         return;
-      }
-
-      if (newStatus === 'done') {
-        triggerCelebration();
       }
     }
 
-    // Optimistic update
-    const columnTasks = getColumnTasks(newStatus).filter((t) => t._id !== draggableId);
-    columnTasks.splice(destination.index, 0, { ...task, status: newStatus });
+    const previousTasks = [...tasks];
+    const movedTask = tasks.find((t) => t._id === draggableId);
+    if (!movedTask) return;
 
-    const updatedTasks = tasks.map((t) => {
-      if (t._id === draggableId) return { ...t, status: newStatus };
-      return t;
-    });
-    setTasks(updatedTasks);
+    const updatedTask = { ...movedTask, status: destStatus, order: destination.index };
+    setTasks((prev) => prev.map((t) => (t._id === draggableId ? updatedTask : t)));
 
-    // Broadcast move event over socket to other connected clients
-    socket.emit('task_moved', { projectId, task: { _id: draggableId, status: newStatus } });
-
-    const taskOrders = columnTasks.map((t, idx) => ({
-      id: t._id,
-      order: idx,
-      status: newStatus,
-    }));
+    if (destStatus === 'done' && sourceStatus !== 'done') {
+      triggerCelebration();
+    }
 
     try {
-      await api.put(`/projects/${projectId}/tasks/reorder`, { taskOrders });
+      const res = await api.patch(`/projects/${projectId}/tasks/${draggableId}/move`, {
+        newStatus: destStatus,
+        newOrder: destination.index,
+      });
+      socket.emit('task_moved', { projectId, task: res.data });
     } catch (err) {
-      setTasks(tasks); // Revert on error
-      setTransitionError('Failed to save task position on server');
+      setTasks(previousTasks);
+      setTransitionError(err.response?.data?.message || 'Failed to persist task movement.');
     }
   };
 
@@ -194,7 +205,6 @@ export default function ProjectBoard() {
     e.preventDefault();
     setTaskError('');
     setCreatingTask(true);
-
     try {
       const res = await api.post(`/projects/${projectId}/tasks`, {
         ...newTask,
@@ -202,10 +212,7 @@ export default function ProjectBoard() {
         assignee: newTask.assignee || undefined,
       });
       setTasks((prev) => [...prev, res.data]);
-      
-      // Broadcast task created over WebSocket
       socket.emit('task_created', { projectId, task: res.data });
-
       setShowNewTask(false);
       setNewTask({ title: '', description: '', priority: 'medium', assignee: '', dueDate: '' });
     } catch (err) {
@@ -274,65 +281,58 @@ export default function ProjectBoard() {
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '12px 24px',
-          background: '#F4F1EA',
-          borderBottom: '1px solid #E2DCD0',
+          background: 'var(--color-surface)',
+          borderBottom: '1px solid var(--color-border)',
           flexShrink: 0,
           gap: '12px',
+          boxShadow: 'var(--shadow-xs)',
         }}
       >
-        {/* Project Title */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        {/* Project Name + Live Presence Indicator */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div
             style={{
               width: '10px',
               height: '10px',
               borderRadius: '50%',
-              background: project.color || '#8A9054',
+              background: project.color || 'var(--color-accent)',
+              boxShadow: `0 0 0 3px ${project.color ? `${project.color}22` : 'rgba(79, 70, 229, 0.15)'}`,
               flexShrink: 0,
             }}
           />
-          <h1 style={{ margin: 0, fontSize: '18px', fontWeight: 700, fontFamily: 'var(--font-serif)', color: '#2C2923' }}>
+          <h1
+            className="font-display"
+            style={{
+              margin: 0,
+              fontSize: '17px',
+              fontWeight: 800,
+              color: 'var(--color-text-primary)',
+              letterSpacing: '-0.02em',
+            }}
+          >
             {project.name}
           </h1>
-        </div>
 
-        {/* Live WebSocket Presence Indicator */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '4px 10px',
-            background: '#EDE8DE',
-            borderRadius: '20px',
-            border: '1px solid #E2DCD0',
-          }}
-          title="Users currently viewing this board live"
-        >
-          <span style={{ position: 'relative', display: 'flex', width: '8px', height: '8px' }}>
-            <span style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#5F8F67', opacity: 0.75, animation: 'ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite' }} />
-            <span style={{ position: 'relative', width: '8px', height: '8px', borderRadius: '50%', background: '#5F8F67' }} />
-          </span>
-          <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', fontWeight: 700, color: '#6B6557' }}>
-            LIVE ({activePresence.length || 1})
-          </span>
-          <div style={{ display: 'flex', alignItems: 'center', marginLeft: '4px' }}>
-            {activePresence.map((u, i) => (
-              <div
-                key={i}
-                className="avatar avatar-accent"
-                style={{
-                  width: '20px',
-                  height: '20px',
-                  fontSize: '8px',
-                  marginLeft: i > 0 ? '-6px' : '0',
-                  boxShadow: '0 0 0 2px #EDE8DE',
-                }}
-                title={`Live: ${u.name || u.email || 'Team member'}`}
-              >
-                {getInitials(u.name || u.email)}
-              </div>
-            ))}
+          {/* Live presence indicator */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '3px 8px',
+              background: 'var(--color-surface-2)',
+              borderRadius: '20px',
+              border: '1px solid var(--color-border)',
+            }}
+            title="Active board viewers"
+          >
+            <span style={{ position: 'relative', display: 'flex', width: '7px', height: '7px' }}>
+              <span className="animate-pulse-dot" style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'var(--color-status-done)' }} />
+              <span style={{ position: 'relative', width: '7px', height: '7px', borderRadius: '50%', background: 'var(--color-status-done)' }} />
+            </span>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--color-text-secondary)' }}>
+              {activePresence.length || 1} live
+            </span>
           </div>
         </div>
 
@@ -346,7 +346,7 @@ export default function ProjectBoard() {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search tasks..."
               className="input"
-              style={{ paddingLeft: '28px', paddingRight: '10px', height: '32px', fontSize: '12px' }}
+              style={{ paddingLeft: '28px', paddingRight: '10px', height: '30px', fontSize: '12px' }}
             />
           </div>
 
@@ -354,7 +354,7 @@ export default function ProjectBoard() {
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
             className="input"
-            style={{ width: '115px', height: '32px', fontSize: '12px', padding: '0 8px' }}
+            style={{ width: '115px', height: '30px', fontSize: '12px', padding: '0 8px' }}
           >
             <option value="all">All Priorities</option>
             <option value="high">High</option>
@@ -363,52 +363,129 @@ export default function ProjectBoard() {
           </select>
         </div>
 
-        {/* Actions */}
+        {/* Action buttons: AI Menu dropdown + New Task + Settings */}
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {/* Consolidated AI Menu Dropdown */}
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowAIMenu((o) => !o)}
+              className="btn btn-ghost"
+              style={{ fontSize: '12px', gap: '4px', padding: '5px 9px' }}
+            >
+              <Sparkles size={13} style={{ color: 'var(--color-accent)' }} />
+              <span>AI Tools</span>
+              <ChevronDown size={12} style={{ color: 'var(--color-text-muted)' }} />
+            </button>
+
+            {showAIMenu && (
+              <>
+                <div
+                  style={{ position: 'fixed', inset: 0, zIndex: 90 }}
+                  onClick={() => setShowAIMenu(false)}
+                />
+                <div
+                  className="animate-slide-down card"
+                  style={{
+                    position: 'absolute',
+                    right: 0,
+                    top: 'calc(100% + 6px)',
+                    width: '190px',
+                    padding: '4px',
+                    zIndex: 100,
+                    boxShadow: 'var(--shadow-lg)',
+                  }}
+                >
+                  <button
+                    onClick={() => { setShowAIMenu(false); setOpenAICopilot(true); }}
+                    className="btn btn-ghost"
+                    style={{ width: '100%', justifyContent: 'flex-start', border: 'none', padding: '7px 10px', fontSize: '12px' }}
+                  >
+                    <Command size={13} style={{ color: 'var(--color-accent)' }} />
+                    AI Copilot (⌘K)
+                  </button>
+                  <button
+                    onClick={() => { setShowAIMenu(false); setOpenAIDigest(true); }}
+                    className="btn btn-ghost"
+                    style={{ width: '100%', justifyContent: 'flex-start', border: 'none', padding: '7px 10px', fontSize: '12px' }}
+                  >
+                    <FileText size={13} style={{ color: '#2563EB' }} />
+                    Standup Digest
+                  </button>
+                  <button
+                    onClick={() => { setShowAIMenu(false); setOpenAIAudit(true); }}
+                    className="btn btn-ghost"
+                    style={{ width: '100%', justifyContent: 'flex-start', border: 'none', padding: '7px 10px', fontSize: '12px' }}
+                  >
+                    <ShieldAlert size={13} style={{ color: '#7C3AED' }} />
+                    Risk Audit
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Controlled Modals for AI Menu */}
           <AICommandBar
             projectId={projectId}
+            menuMode
+            externalOpen={openAICopilot}
+            setExternalOpen={setOpenAICopilot}
             onTaskCreated={(createdTask) => {
               setTasks((prev) => [...prev, createdTask]);
               socket.emit('task_created', { projectId, task: createdTask });
             }}
           />
-          <AIDigestModal projectId={projectId} projectName={project.name} />
+          <AIDigestModal
+            projectId={projectId}
+            menuMode
+            externalOpen={openAIDigest}
+            setExternalOpen={setOpenAIDigest}
+          />
+          <AIAuditPanel
+            projectId={projectId}
+            menuMode
+            externalOpen={openAIAudit}
+            setExternalOpen={setOpenAIAudit}
+          />
+
           <button
             id="btn-new-task"
             onClick={() => { setNewTaskStatus('todo'); setShowNewTask(true); }}
             className="btn btn-primary"
+            style={{ padding: '5px 12px', fontSize: '12.5px' }}
           >
-            <Plus size={15} />
+            <Plus size={14} />
             New Task
           </button>
+
           <button
             id="btn-project-settings"
             onClick={() => setShowSettings(true)}
-            className="btn btn-ghost"
+            className="btn-icon"
             title="Project Settings"
           >
-            <Settings size={15} />
+            <Settings size={16} />
           </button>
         </div>
       </div>
 
-      {/* Transition Guard Error Banner */}
+      {/* Error banner */}
       {transitonError && (
         <div
           style={{
-            margin: '12px 24px 0',
+            margin: '10px 24px 0',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            padding: '8px 14px',
+            padding: '8px 12px',
             background: 'var(--color-danger-subtle)',
-            border: '1px solid rgba(192, 88, 79, 0.3)',
-            borderRadius: 'var(--radius-md)',
+            border: '1px solid rgba(225, 29, 72, 0.25)',
+            borderRadius: 'var(--radius-sm)',
             fontSize: '12px',
             color: 'var(--color-danger)',
           }}
         >
-          <AlertCircle size={15} style={{ flexShrink: 0 }} />
+          <AlertCircle size={14} style={{ flexShrink: 0 }} />
           <span style={{ flex: 1, minWidth: 0 }}>{transitonError}</span>
           <button onClick={() => setTransitionError('')} className="btn-icon" style={{ padding: '2px' }}>
             <X size={13} />
@@ -416,87 +493,69 @@ export default function ProjectBoard() {
         </div>
       )}
 
-      {/* AI Telemetry Audit Collapsible Panel */}
-      <div style={{ padding: '12px 24px 0' }}>
-        <AIAuditPanel projectId={projectId} />
-      </div>
-
-      {/* Kanban Drag and Drop Columns */}
+      {/* Kanban Drag and Drop Columns — Distinct Trays with Depth & Tints */}
       <DragDropContext onDragEnd={onDragEnd}>
         <div
           style={{
             flex: 1,
             display: 'flex',
             gap: '16px',
-            padding: '16px 24px 24px',
+            padding: '20px 24px 24px',
             overflowX: 'auto',
             alignItems: 'flex-start',
           }}
         >
           {COLUMNS.map((col) => {
             const colTasks = getColumnTasks(col.id);
-            const totalTasks = filteredTasks.length;
-
-            const colMeta = {
-              todo:       { color: 'var(--color-status-todo)',       emptyIcon: '○', emptyTitle: 'Backlog is clear', emptyHint: 'New tasks land here. Click + to add one.' },
-              inprogress: { color: 'var(--color-status-inprogress)', emptyIcon: '◎', emptyTitle: 'Nothing active', emptyHint: 'Drag a task here when work begins.' },
-              inreview:   { color: 'var(--color-status-inreview)',   emptyIcon: '◑', emptyTitle: 'No pending reviews', emptyHint: 'Tasks awaiting approval appear here.' },
-              done:       { color: 'var(--color-status-done)',       emptyIcon: '●', emptyTitle: 'No completions yet', emptyHint: 'Finished tasks accumulate here.' },
-            };
-            const meta = colMeta[col.id];
+            const ColumnIcon = col.icon;
 
             return (
               <div
                 key={col.id}
                 style={{
-                  flex: '0 0 282px',
+                  flex: '0 0 280px',
                   display: 'flex',
                   flexDirection: 'column',
-                  maxHeight: '100%',
-                  background: 'var(--color-surface)',
-                  border: '1px solid var(--color-border)',
+                  minHeight: 'calc(100vh - 140px)',
+                  background: col.bg,
+                  border: `1px solid ${col.border}`,
+                  borderTop: `3.5px solid ${col.color}`,
                   borderRadius: 'var(--radius-lg)',
+                  boxShadow: 'var(--shadow-xs)',
                   overflow: 'hidden',
-                  transition: 'border-color 0.15s ease',
                 }}
               >
-                {/* Colored top accent bar */}
-                <div style={{ height: '3px', background: meta.color, flexShrink: 0 }} />
-
-                {/* Column header */}
+                {/* Column header with status badge and count pill */}
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '10px 14px 8px',
-                    borderBottom: '1px solid var(--color-border-subtle)',
+                    padding: '12px 14px',
+                    borderBottom: `1px solid ${col.border}`,
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                    <ColumnIcon size={15} style={{ color: col.color }} />
                     <span
+                      className="font-display"
                       style={{
-                        fontSize: '11px',
+                        fontSize: '13px',
                         fontWeight: 700,
-                        color: 'var(--color-text-secondary)',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.06em',
-                        fontFamily: 'var(--font-mono)',
+                        color: 'var(--color-text-primary)',
                       }}
                     >
                       {col.label}
                     </span>
                     <span
                       style={{
-                        fontSize: '10px',
-                        fontFamily: 'var(--font-mono)',
-                        fontWeight: 600,
-                        color: meta.color,
-                        background: `color-mix(in srgb, ${meta.color} 10%, transparent)`,
-                        padding: '1px 5px',
-                        borderRadius: '2px',
-                        minWidth: '18px',
-                        textAlign: 'center',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        color: col.color,
+                        background: 'var(--color-surface)',
+                        padding: '1px 7px',
+                        borderRadius: '10px',
+                        boxShadow: 'var(--shadow-xs)',
                       }}
                     >
                       {colTasks.length}
@@ -506,15 +565,12 @@ export default function ProjectBoard() {
                     onClick={() => { setNewTaskStatus(col.id); setShowNewTask(true); }}
                     className="btn-icon"
                     title={`Add task to ${col.label}`}
-                    style={{ opacity: 0.6, transition: 'opacity 0.12s' }}
-                    onMouseEnter={(e) => (e.currentTarget.style.opacity = 1)}
-                    onMouseLeave={(e) => (e.currentTarget.style.opacity = 0.6)}
                   >
                     <Plus size={14} />
                   </button>
                 </div>
 
-                {/* Droppable cards area */}
+                {/* Droppable cards tray area */}
                 <Droppable droppableId={col.id}>
                   {(provided, snapshot) => (
                     <div
@@ -527,52 +583,78 @@ export default function ProjectBoard() {
                         gap: '8px',
                         padding: '10px',
                         overflowY: 'auto',
-                        minHeight: '180px',
+                        minHeight: '160px',
+                        transition: 'background 0.15s, border-color 0.15s',
                         background: snapshot.isDraggingOver
-                          ? `color-mix(in srgb, ${meta.color} 5%, transparent)`
+                          ? 'rgba(255, 255, 255, 0.7)'
                           : 'transparent',
-                        transition: 'background 0.15s ease',
                       }}
                     >
+                      {/* Rich Column Empty State */}
                       {colTasks.length === 0 && !snapshot.isDraggingOver && (
                         <div
                           style={{
-                            flex: 1,
+                            padding: '32px 16px',
+                            textAlign: 'center',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            padding: '32px 16px',
-                            gap: '8px',
-                            border: '1px dashed var(--color-border-subtle)',
-                            borderRadius: 'var(--radius-md)',
-                            marginTop: '2px',
                           }}
                         >
-                          <span style={{ fontSize: '22px', color: meta.color, opacity: 0.4, lineHeight: 1 }}>
-                            {meta.emptyIcon}
-                          </span>
-                          <span style={{ fontSize: '11.5px', fontWeight: 600, color: 'var(--color-text-secondary)' }}>
-                            {meta.emptyTitle}
-                          </span>
-                          <span style={{ fontSize: '10.5px', color: 'var(--color-text-muted)', textAlign: 'center', lineHeight: 1.5 }}>
-                            {meta.emptyHint}
-                          </span>
+                          <div
+                            style={{
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '50%',
+                              background: 'var(--color-surface)',
+                              boxShadow: 'var(--shadow-xs)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: col.color,
+                              marginBottom: '10px',
+                            }}
+                          >
+                            <ColumnIcon size={18} />
+                          </div>
+                          <p
+                            className="font-display"
+                            style={{
+                              margin: '0 0 3px 0',
+                              fontSize: '12.5px',
+                              fontWeight: 700,
+                              color: 'var(--color-text-primary)',
+                            }}
+                          >
+                            {col.emptyTitle}
+                          </p>
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: '11.5px',
+                              color: 'var(--color-text-muted)',
+                              lineHeight: 1.4,
+                              maxWidth: '190px',
+                            }}
+                          >
+                            {col.emptyHint}
+                          </p>
                         </div>
                       )}
 
                       {colTasks.map((task, index) => (
                         <Draggable key={task._id} draggableId={task._id} index={index}>
-                          {(provided, snapshot) => (
+                          {(dragProvided, dragSnapshot) => (
                             <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
+                              ref={dragProvided.innerRef}
+                              {...dragProvided.draggableProps}
+                              {...dragProvided.dragHandleProps}
                             >
                               <TaskCard
                                 task={task}
                                 projectId={projectId}
-                                isDragging={snapshot.isDragging}
+                                isDragging={dragSnapshot.isDragging}
                               />
                             </div>
                           )}
@@ -590,52 +672,48 @@ export default function ProjectBoard() {
 
       {/* New Task Modal */}
       {showNewTask && (
-        <div className="modal-overlay">
-          <div className="modal-box" style={{ maxWidth: '440px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 700, fontFamily: 'var(--font-serif)' }}>
-                New Task ({COLUMNS.find((c) => c.id === newTaskStatus)?.label})
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowNewTask(false); }}>
+          <div className="modal-box animate-scale-in" style={{ maxWidth: '440px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+              <h2 className="font-display" style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                New Task — {COLUMNS.find((c) => c.id === newTaskStatus)?.label}
               </h2>
-              <button onClick={() => setShowNewTask(false)} className="btn-icon">
-                <X size={16} />
-              </button>
+              <button onClick={() => setShowNewTask(false)} className="btn-icon"><X size={16} /></button>
             </div>
-
             <form onSubmit={handleCreateTask}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <div>
-                  <label htmlFor="task-title" className="field-label">Title</label>
+                  <label htmlFor="task-title" className="field-label">Title *</label>
                   <input
                     id="task-title"
                     type="text"
                     required
                     value={newTask.title}
-                    onChange={(e) => setNewTask((t) => ({ ...t, title: e.target.value }))}
-                    placeholder="e.g. Implement user authentication flow"
+                    onChange={(e) => setNewTask((f) => ({ ...f, title: e.target.value }))}
                     className="input"
+                    placeholder="Task title..."
+                    autoFocus
                   />
                 </div>
-
                 <div>
-                  <label htmlFor="task-description" className="field-label">Description</label>
+                  <label htmlFor="task-desc" className="field-label">Description</label>
                   <textarea
-                    id="task-description"
+                    id="task-desc"
                     rows={3}
                     value={newTask.description}
-                    onChange={(e) => setNewTask((t) => ({ ...t, description: e.target.value }))}
-                    placeholder="Provide details or criteria..."
+                    onChange={(e) => setNewTask((f) => ({ ...f, description: e.target.value }))}
                     className="input"
                     style={{ resize: 'vertical' }}
+                    placeholder="Task details and scope..."
                   />
                 </div>
-
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
                     <label htmlFor="task-priority" className="field-label">Priority</label>
                     <select
                       id="task-priority"
                       value={newTask.priority}
-                      onChange={(e) => setNewTask((t) => ({ ...t, priority: e.target.value }))}
+                      onChange={(e) => setNewTask((f) => ({ ...f, priority: e.target.value }))}
                       className="input"
                     >
                       <option value="low">Low</option>
@@ -643,32 +721,28 @@ export default function ProjectBoard() {
                       <option value="high">High</option>
                     </select>
                   </div>
-
                   <div>
                     <label htmlFor="task-assignee" className="field-label">Assignee</label>
                     <select
                       id="task-assignee"
                       value={newTask.assignee}
-                      onChange={(e) => setNewTask((t) => ({ ...t, assignee: e.target.value }))}
+                      onChange={(e) => setNewTask((f) => ({ ...f, assignee: e.target.value }))}
                       className="input"
                     >
                       <option value="">Unassigned</option>
                       {project.members?.map((m) => (
-                        <option key={m._id} value={m._id}>
-                          {m.name}
-                        </option>
+                        <option key={m._id} value={m._id}>{m.name}</option>
                       ))}
                     </select>
                   </div>
                 </div>
-
                 <div>
-                  <label htmlFor="task-due-date" className="field-label">Due Date</label>
+                  <label htmlFor="task-duedate" className="field-label">Due Date</label>
                   <input
-                    id="task-due-date"
+                    id="task-duedate"
                     type="date"
                     value={newTask.dueDate}
-                    onChange={(e) => setNewTask((t) => ({ ...t, dueDate: e.target.value }))}
+                    onChange={(e) => setNewTask((f) => ({ ...f, dueDate: e.target.value }))}
                     className="input"
                   />
                 </div>
@@ -677,20 +751,11 @@ export default function ProjectBoard() {
                   <p style={{ margin: 0, fontSize: '12px', color: 'var(--color-danger)' }}>{taskError}</p>
                 )}
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
-                  <button
-                    type="button"
-                    onClick={() => setShowNewTask(false)}
-                    className="btn btn-ghost"
-                  >
+                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '6px' }}>
+                  <button type="button" onClick={() => setShowNewTask(false)} className="btn btn-ghost">
                     Cancel
                   </button>
-                  <button
-                    id="btn-create-task-submit"
-                    type="submit"
-                    disabled={creatingTask}
-                    className="btn btn-primary"
-                  >
+                  <button id="btn-create-task-confirm" type="submit" disabled={creatingTask} className="btn btn-primary">
                     {creatingTask ? 'Creating...' : 'Create Task'}
                   </button>
                 </div>
@@ -702,51 +767,22 @@ export default function ProjectBoard() {
 
       {/* Project Settings Modal */}
       {showSettings && (
-        <div className="modal-overlay">
-          <div className="modal-box" style={{ maxWidth: '480px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 700, fontFamily: 'var(--font-serif)' }}>
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowSettings(false); }}>
+          <div className="modal-box animate-scale-in" style={{ maxWidth: '440px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+              <h2 className="font-display" style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                 Project Settings
               </h2>
-              <button onClick={() => setShowSettings(false)} className="btn-icon">
-                <X size={16} />
-              </button>
+              <button onClick={() => setShowSettings(false)} className="btn-icon"><X size={16} /></button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {/* Member management */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Members section */}
               <div>
-                <h3 style={{ margin: '0 0 10px 0', fontSize: '13px', fontWeight: 700 }}>
-                  Team Members ({project.members?.length || 0})
-                </h3>
-
-                <form onSubmit={handleAddMember} style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-                  <input
-                    type="email"
-                    required
-                    value={memberEmail}
-                    onChange={(e) => setMemberEmail(e.target.value)}
-                    placeholder="teammate@organization.com"
-                    className="input"
-                    style={{ flex: 1 }}
-                  />
-                  <button
-                    type="submit"
-                    disabled={addingMember}
-                    className="btn btn-ghost"
-                  >
-                    <UserPlus size={14} />
-                    Add
-                  </button>
-                </form>
-
-                {memberError && (
-                  <p style={{ margin: '0 0 10px 0', fontSize: '12px', color: 'var(--color-danger)' }}>
-                    {memberError}
-                  </p>
-                )}
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '160px', overflowY: 'auto' }}>
+                <span className="field-label" style={{ marginBottom: '8px' }}>
+                  Team Members ({project.members?.length})
+                </span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '10px' }}>
                   {project.members?.map((m) => (
                     <div
                       key={m._id}
@@ -755,48 +791,69 @@ export default function ProjectBoard() {
                         alignItems: 'center',
                         justifyContent: 'space-between',
                         padding: '6px 10px',
-                        background: '#EDE8DE',
-                        borderRadius: 'var(--radius-sm)',
+                        background: 'var(--color-surface-2)',
+                        borderRadius: 'var(--radius-xs)',
                         fontSize: '12px',
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div className="avatar avatar-accent" style={{ width: '22px', height: '22px', fontSize: '8.5px' }}>
+                        <div
+                          className="avatar"
+                          style={{ width: '22px', height: '22px', fontSize: '9px', ...getAvatarStyle(m.name) }}
+                        >
                           {getInitials(m.name)}
                         </div>
-                        <div>
-                          <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{m.name}</span>
-                          <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginLeft: '6px' }}>
-                            ({m.email})
-                          </span>
-                        </div>
+                        <span style={{ color: 'var(--color-text-primary)', fontWeight: 600 }}>{m.name}</span>
+                        {m._id === project.owner && (
+                          <span className="badge badge-accent" style={{ fontSize: '10px' }}>Owner</span>
+                        )}
                       </div>
 
-                      {project.owner?._id === user?.id && m._id !== user?.id && (
+                      {user?._id === project.owner && m._id !== project.owner && (
                         <button
                           onClick={() => handleRemoveMember(m._id)}
                           className="btn-icon"
                           title="Remove member"
-                          style={{ color: 'var(--color-danger)' }}
                         >
-                          <Trash2 size={13} />
+                          <X size={13} />
                         </button>
                       )}
                     </div>
                   ))}
                 </div>
+
+                {/* Add member form */}
+                {user?._id === project.owner && (
+                  <form onSubmit={handleAddMember} style={{ display: 'flex', gap: '6px' }}>
+                    <input
+                      type="email"
+                      required
+                      value={memberEmail}
+                      onChange={(e) => setMemberEmail(e.target.value)}
+                      placeholder="Colleague email..."
+                      className="input"
+                      style={{ fontSize: '12px' }}
+                    />
+                    <button type="submit" disabled={addingMember} className="btn btn-ghost" style={{ fontSize: '12px' }}>
+                      <UserPlus size={13} />
+                      Add
+                    </button>
+                  </form>
+                )}
+                {memberError && <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--color-danger)' }}>{memberError}</p>}
               </div>
 
-              {/* Danger zone */}
-              {project.owner?._id === user?.id && (
-                <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '16px' }}>
-                  <h3 style={{ margin: '0 0 6px 0', fontSize: '13px', fontWeight: 700, color: 'var(--color-danger)' }}>
+              {/* Danger Zone */}
+              {user?._id === project.owner && (
+                <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '14px' }}>
+                  <span className="field-label" style={{ color: 'var(--color-danger)', marginBottom: '8px' }}>
                     Danger Zone
-                  </h3>
-                  <p style={{ margin: '0 0 10px 0', fontSize: '12px', color: 'var(--color-text-muted)' }}>
-                    Deleting this project will permanently remove all associated tasks and data.
-                  </p>
-                  <button onClick={handleDeleteProject} className="btn btn-danger">
+                  </span>
+                  <button
+                    onClick={handleDeleteProject}
+                    className="btn btn-danger"
+                    style={{ width: '100%', justifyContent: 'center' }}
+                  >
                     <Trash2 size={14} />
                     Delete Project
                   </button>

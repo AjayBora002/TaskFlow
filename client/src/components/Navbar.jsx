@@ -1,7 +1,26 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from './NotificationBell';
-import { LogOut, LayoutDashboard } from 'lucide-react';
+import { LogOut, LayoutDashboard, Sparkles } from 'lucide-react';
+
+const AVATAR_COLORS = [
+  { bg: '#2563EB', color: '#FFFFFF' },
+  { bg: '#059669', color: '#FFFFFF' },
+  { bg: '#7C3AED', color: '#FFFFFF' },
+  { bg: '#D97706', color: '#FFFFFF' },
+  { bg: '#DB2777', color: '#FFFFFF' },
+  { bg: '#4F46E5', color: '#FFFFFF' },
+];
+
+function getAvatarStyle(name) {
+  if (!name) return { background: '#4F46E5', color: '#FFFFFF' };
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % AVATAR_COLORS.length;
+  return { background: AVATAR_COLORS[index].bg, color: AVATAR_COLORS[index].color };
+}
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -15,22 +34,23 @@ export default function Navbar() {
 
   const initials = user?.name
     ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
-    : '?';
+    : 'TF';
 
   const isDashboardActive = location.pathname === '/';
 
   return (
     <header
       style={{
-        height: '56px',
-        background: '#F4F1EA',
-        borderBottom: '1px solid #E2DCD0',
+        height: '52px',
+        background: 'var(--color-surface)',
+        borderBottom: '1px solid var(--color-border)',
         display: 'flex',
         alignItems: 'center',
-        padding: '0 24px',
+        padding: '0 20px',
         gap: '16px',
         flexShrink: 0,
         zIndex: 50,
+        boxShadow: 'var(--shadow-xs)',
       }}
     >
       {/* Brand logo */}
@@ -39,81 +59,98 @@ export default function Navbar() {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '10px',
+          gap: '9px',
           textDecoration: 'none',
-          color: '#2C2923',
+          color: 'var(--color-text-primary)',
         }}
       >
         <span
           style={{
             width: '28px',
             height: '28px',
-            background: '#8A9054',
-            borderRadius: '8px',
+            background: 'linear-gradient(135deg, #4F46E5 0%, #3730A3 100%)',
+            borderRadius: 'var(--radius-xs)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '12px',
             fontWeight: 800,
-            color: '#FFF',
-            fontFamily: 'var(--font-mono)',
+            color: '#FFFFFF',
+            boxShadow: '0 2px 6px rgba(79, 70, 229, 0.3)',
           }}
         >
-          T
+          TF
         </span>
-        <span style={{ fontWeight: 700, fontSize: '16px', fontFamily: 'var(--font-serif)', letterSpacing: '-0.01em' }}>
+        <span
+          className="font-display"
+          style={{
+            fontWeight: 800,
+            fontSize: '16px',
+            color: 'var(--color-text-primary)',
+            letterSpacing: '-0.02em',
+          }}
+        >
           TaskFlow
         </span>
       </Link>
 
       {/* Vertical separator */}
-      <div style={{ width: '1px', height: '18px', background: '#E2DCD0' }} />
+      <div style={{ width: '1px', height: '18px', background: 'var(--color-border)' }} />
 
       {/* Navigation items */}
-      <nav style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <nav style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
         <Link
           to="/"
           className="btn"
           style={{
-            background: isDashboardActive ? '#EDE8DE' : 'transparent',
-            color: isDashboardActive ? '#2C2923' : '#6B6557',
-            border: isDashboardActive ? '1px solid #D6CEBC' : '1px solid transparent',
-            padding: '6px 12px',
+            background: isDashboardActive ? 'var(--color-surface-2)' : 'transparent',
+            color: isDashboardActive ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
+            border: isDashboardActive ? '1px solid var(--color-border)' : '1px solid transparent',
+            padding: '5px 10px',
             fontSize: '13px',
-            borderRadius: '8px',
+            fontWeight: isDashboardActive ? 600 : 500,
           }}
         >
-          <LayoutDashboard size={14} style={{ color: isDashboardActive ? '#8A9054' : 'inherit' }} />
+          <LayoutDashboard size={14} style={{ color: isDashboardActive ? 'var(--color-accent)' : 'inherit' }} />
           Dashboard
         </Link>
       </nav>
 
       <div style={{ flex: 1 }} />
 
-      {/* Notification Bell */}
+      {/* Notification Bell with pulse dot */}
       <NotificationBell />
 
-      {/* User info pill */}
+      {/* User profile pill */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          padding: '4px 10px 4px 4px',
-          background: '#EDE8DE',
-          border: '1px solid #E2DCD0',
+          padding: '3px 10px 3px 3px',
+          background: 'var(--color-surface-2)',
+          border: '1px solid var(--color-border)',
           borderRadius: '20px',
         }}
       >
-        <div className="avatar avatar-accent" style={{ width: '24px', height: '24px', fontSize: '9px' }}>
+        <div
+          className="avatar"
+          style={{
+            width: '24px',
+            height: '24px',
+            fontSize: '9.5px',
+            boxShadow: 'none',
+            ...getAvatarStyle(user?.name),
+          }}
+        >
           {initials}
         </div>
         <span
           style={{
             fontSize: '12.5px',
             fontWeight: 600,
-            color: '#2C2923',
-            maxWidth: '120px',
+            color: 'var(--color-text-primary)',
+            maxWidth: '130px',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',

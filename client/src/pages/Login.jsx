@@ -26,7 +26,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
 
-  // Handle incoming OAuth token or error from redirect
   useEffect(() => {
     const token = searchParams.get('token');
     const oauthError = searchParams.get('error');
@@ -88,149 +87,153 @@ export default function Login() {
         <div style={{ marginBottom: '28px', textAlign: 'center' }}>
           <div
             style={{
-              width: '40px',
-              height: '40px',
-              background: 'var(--color-accent)',
+              width: '44px',
+              height: '44px',
+              background: 'linear-gradient(135deg, #4F46E5 0%, #3730A3 100%)',
               borderRadius: 'var(--radius-sm)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              margin: '0 auto 14px',
-              fontSize: '15px',
+              margin: '0 auto 16px',
+              fontSize: '16px',
               fontWeight: 800,
-              color: '#fff',
-              fontFamily: 'var(--font-mono)',
+              color: '#FFF',
+              boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)',
             }}
           >
             TF
           </div>
           <h1
+            className="font-display"
             style={{
               margin: 0,
-              fontSize: '20px',
-              fontWeight: 700,
+              fontSize: '22px',
+              fontWeight: 800,
               color: 'var(--color-text-primary)',
-              letterSpacing: '-0.02em',
+              letterSpacing: '-0.025em',
             }}
           >
             Sign in to TaskFlow
           </h1>
         </div>
 
-        {/* OAuth 2.0 Security Buttons */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
-          <button
-            id="btn-oauth-github"
-            type="button"
-            disabled={oauthLoading}
-            onClick={() => handleOAuthLogin('github')}
-            className="btn btn-ghost"
-            style={{
-              width: '100%',
-              justifyContent: 'center',
-              padding: '9px',
-              fontSize: '13px',
-              background: '#24292e',
-              color: '#fff',
-              borderColor: '#30363d',
-            }}
-          >
-            <GithubIcon />
-            Sign in with GitHub
-          </button>
-
-          <button
-            id="btn-oauth-linkedin"
-            type="button"
-            disabled={oauthLoading}
-            onClick={() => handleOAuthLogin('linkedin')}
-            className="btn btn-ghost"
-            style={{
-              width: '100%',
-              justifyContent: 'center',
-              padding: '9px',
-              fontSize: '13px',
-              background: '#0a66c2',
-              color: '#fff',
-              borderColor: '#0a66c2',
-            }}
-          >
-            <LinkedinIcon />
-            Sign in with LinkedIn
-          </button>
-        </div>
-
-        {/* Divider */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-          <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
-          <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase' }}>
-            or with email
-          </span>
-          <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
-        </div>
-
-        {/* Email Password Form */}
-        <form onSubmit={handleSubmit}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div>
-              <label htmlFor="login-email" className="field-label">Email</label>
-              <input
-                id="login-email"
-                type="email"
-                autoComplete="email"
-                required
-                value={form.email}
-                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                className="input"
-                placeholder="you@organization.com"
-              />
-            </div>
-            <div>
-              <label htmlFor="login-password" className="field-label">Password</label>
-              <input
-                id="login-password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={form.password}
-                onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-                className="input"
-                placeholder="••••••••"
-              />
-            </div>
-
-            {error && (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '8px',
-                  padding: '10px 12px',
-                  background: 'var(--color-danger-subtle)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  borderRadius: 'var(--radius-sm)',
-                  fontSize: '12px',
-                  color: 'var(--color-danger)',
-                }}
-              >
-                <AlertCircle size={15} style={{ flexShrink: 0, marginTop: '1px' }} />
-                <span>{error}</span>
-              </div>
-            )}
+        {/* Card wrapper */}
+        <div className="card" style={{ padding: '24px', background: 'var(--color-surface)', boxShadow: 'var(--shadow-md)' }}>
+          {/* OAuth Buttons */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+            <button
+              id="btn-oauth-github"
+              type="button"
+              disabled={oauthLoading}
+              onClick={() => handleOAuthLogin('github')}
+              className="btn btn-ghost"
+              style={{
+                width: '100%',
+                justifyContent: 'center',
+                padding: '9px',
+                fontSize: '13px',
+                background: '#0F172A',
+                color: '#FFF',
+                borderColor: '#1E293B',
+              }}
+            >
+              <GithubIcon />
+              Sign in with GitHub
+            </button>
 
             <button
-              id="btn-login-submit"
-              type="submit"
-              disabled={loading}
-              className="btn btn-primary"
-              style={{ width: '100%', justifyContent: 'center', padding: '9px', fontSize: '13px', marginTop: '4px' }}
+              id="btn-oauth-linkedin"
+              type="button"
+              disabled={oauthLoading}
+              onClick={() => handleOAuthLogin('linkedin')}
+              className="btn btn-ghost"
+              style={{
+                width: '100%',
+                justifyContent: 'center',
+                padding: '9px',
+                fontSize: '13px',
+                background: '#0A66C2',
+                color: '#FFF',
+                borderColor: '#0A66C2',
+              }}
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              <LinkedinIcon />
+              Sign in with LinkedIn
             </button>
           </div>
-        </form>
 
-        <p style={{ marginTop: '24px', textAlign: 'center', fontSize: '12.5px', color: 'var(--color-text-muted)' }}>
+          {/* Divider */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+            <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
+            <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              or with email
+            </span>
+            <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label htmlFor="login-email" className="field-label">Email</label>
+                <input
+                  id="login-email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={form.email}
+                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                  className="input"
+                  placeholder="you@organization.com"
+                />
+              </div>
+              <div>
+                <label htmlFor="login-password" className="field-label">Password</label>
+                <input
+                  id="login-password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={form.password}
+                  onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                  className="input"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              {error && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '8px',
+                    padding: '10px 12px',
+                    background: 'var(--color-danger-subtle)',
+                    border: '1px solid rgba(225, 29, 72, 0.25)',
+                    borderRadius: 'var(--radius-sm)',
+                    fontSize: '12px',
+                    color: 'var(--color-danger)',
+                  }}
+                >
+                  <AlertCircle size={15} style={{ flexShrink: 0, marginTop: '1px' }} />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <button
+                id="btn-login-submit"
+                type="submit"
+                disabled={loading}
+                className="btn btn-primary"
+                style={{ width: '100%', justifyContent: 'center', padding: '9px', fontSize: '13px', marginTop: '4px' }}
+              >
+                {loading ? 'Signing in...' : 'Sign in'}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <p style={{ marginTop: '20px', textAlign: 'center', fontSize: '12.5px', color: 'var(--color-text-secondary)' }}>
           Don't have an account?{' '}
           <Link to="/register" style={{ color: 'var(--color-accent)', textDecoration: 'none', fontWeight: 600 }}>
             Create one

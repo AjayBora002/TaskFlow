@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Check, CheckCheck, Inbox } from 'lucide-react';
+import { Bell, CheckCheck, Inbox, Check } from 'lucide-react';
 import api from '../api/axios';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -79,31 +79,31 @@ export default function NotificationBell() {
         <Bell size={16} />
         {data.unreadCount > 0 && (
           <span
+            className="animate-pulse-dot"
             style={{
               position: 'absolute',
               top: '4px',
               right: '4px',
-              width: '7px',
-              height: '7px',
+              width: '8px',
+              height: '8px',
               borderRadius: '50%',
               background: 'var(--color-accent)',
-              boxShadow: '0 0 8px var(--color-accent)',
+              boxShadow: '0 0 8px rgba(79, 70, 229, 0.6)',
             }}
-            className="animate-pulse-dot"
           />
         )}
       </button>
 
       {open && (
         <div
-          className="animate-slide-down"
+          className="animate-slide-down card"
           style={{
             position: 'absolute',
             top: 'calc(100% + 10px)',
             right: 0,
-            width: '360px',
+            width: '340px',
             background: 'var(--color-surface)',
-            border: '1px solid var(--color-border-bright)',
+            border: '1px solid var(--color-border)',
             borderRadius: 'var(--radius-lg)',
             boxShadow: 'var(--shadow-xl)',
             zIndex: 100,
@@ -116,13 +116,13 @@ export default function NotificationBell() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '12px 16px',
+              padding: '10px 14px',
               borderBottom: '1px solid var(--color-border)',
               background: 'var(--color-surface-2)',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span className="font-display" style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                 Notifications
               </span>
               {data.unreadCount > 0 && (
@@ -140,7 +140,7 @@ export default function NotificationBell() {
                   cursor: 'pointer',
                   color: 'var(--color-accent)',
                   fontSize: '11.5px',
-                  fontWeight: 500,
+                  fontWeight: 600,
                   display: 'flex',
                   alignItems: 'center',
                   gap: '4px',
@@ -155,20 +155,20 @@ export default function NotificationBell() {
           </div>
 
           {/* List */}
-          <div style={{ maxHeight: '340px', overflowY: 'auto' }}>
+          <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
             {data.notifications.length === 0 ? (
               <div
                 style={{
-                  padding: '36px 20px',
+                  padding: '32px 16px',
                   textAlign: 'center',
                   color: 'var(--color-text-muted)',
                 }}
               >
-                <Inbox size={28} style={{ margin: '0 auto 10px', opacity: 0.3, display: 'block' }} />
-                <p style={{ margin: 0, fontSize: '12.5px', fontWeight: 500, color: 'var(--color-text-secondary)' }}>
-                  All clear
+                <Inbox size={24} style={{ margin: '0 auto 8px', opacity: 0.4, display: 'block' }} />
+                <p style={{ margin: 0, fontSize: '12.5px', fontWeight: 600, color: 'var(--color-text-secondary)' }}>
+                  All caught up!
                 </p>
-                <p style={{ margin: '4px 0 0', fontSize: '11.5px', color: 'var(--color-text-muted)' }}>
+                <p style={{ margin: '2px 0 0', fontSize: '11.5px', color: 'var(--color-text-muted)' }}>
                   No unread task updates or mentions.
                 </p>
               </div>
@@ -181,9 +181,9 @@ export default function NotificationBell() {
                     display: 'flex',
                     alignItems: 'flex-start',
                     gap: '10px',
-                    padding: '11px 16px',
+                    padding: '10px 14px',
                     cursor: n.link ? 'pointer' : 'default',
-                    background: n.read ? 'transparent' : 'rgba(47, 158, 111, 0.04)',
+                    background: n.read ? 'transparent' : 'rgba(79, 70, 229, 0.03)',
                     borderBottom: '1px solid var(--color-border-subtle)',
                     transition: 'background 0.12s ease',
                   }}
@@ -191,7 +191,7 @@ export default function NotificationBell() {
                     if (n.link) e.currentTarget.style.background = 'var(--color-surface-2)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = n.read ? 'transparent' : 'rgba(47, 158, 111, 0.04)';
+                    e.currentTarget.style.background = n.read ? 'transparent' : 'rgba(79, 70, 229, 0.03)';
                   }}
                 >
                   <div style={{ marginTop: '5px', flexShrink: 0, width: '6px' }}>
@@ -202,22 +202,20 @@ export default function NotificationBell() {
                           height: '6px',
                           borderRadius: '50%',
                           background: 'var(--color-accent)',
-                          boxShadow: '0 0 6px var(--color-accent)',
                         }}
                       />
                     )}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--color-text-primary)', lineHeight: 1.45 }}>
+                    <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--color-text-primary)', lineHeight: 1.4 }}>
                       {n.message}
                     </p>
                     <span
                       style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '10px',
+                        fontSize: '10.5px',
                         color: 'var(--color-text-muted)',
                         display: 'block',
-                        marginTop: '4px',
+                        marginTop: '3px',
                       }}
                     >
                       {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
@@ -228,7 +226,7 @@ export default function NotificationBell() {
                       onClick={(e) => { e.stopPropagation(); markRead(n._id); }}
                       title="Mark as read"
                       className="btn-icon"
-                      style={{ padding: '3px', marginTop: '2px' }}
+                      style={{ padding: '2px', marginTop: '2px' }}
                     >
                       <Check size={13} />
                     </button>

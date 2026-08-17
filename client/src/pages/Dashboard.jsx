@@ -61,7 +61,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div style={{ padding: '32px 36px', maxWidth: '1000px', margin: '0 auto' }}>
+      <div style={{ padding: '28px 36px', maxWidth: '1000px', margin: '0 auto' }}>
         <div className="skeleton" style={{ height: '32px', width: '200px', marginBottom: '24px' }} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div className="skeleton" style={{ height: '80px', width: '100%' }} />
@@ -71,7 +71,6 @@ export default function Dashboard() {
     );
   }
 
-  // Aggregate global team stats
   const totalProjects = projects.length;
   let totalTasks = 0;
   let totalOverdue = 0;
@@ -84,23 +83,24 @@ export default function Dashboard() {
   });
 
   return (
-    <div style={{ padding: '32px 36px', maxWidth: '1000px', margin: '0 auto' }} className="animate-fade-up">
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px' }}>
+    <div style={{ padding: '28px 36px', maxWidth: '1000px', margin: '0 auto' }} className="animate-fade-in">
+      {/* Page Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
         <div>
           <h1
+            className="font-display"
             style={{
               margin: 0,
-              fontSize: '20px',
-              fontWeight: 700,
+              fontSize: '22px',
+              fontWeight: 800,
               color: 'var(--color-text-primary)',
-              letterSpacing: '-0.02em',
+              letterSpacing: '-0.025em',
             }}
           >
-            Team Workspace
+            Workspace Overview
           </h1>
-          <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
-            Overview of active projects, workloads, and overall progress.
+          <p style={{ margin: '3px 0 0', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+            Track project metrics, active workloads, and team progress.
           </p>
         </div>
         <button
@@ -113,7 +113,7 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/* Global Summary Stats */}
+      {/* Global Stat Cards with Elevation & High Contrast Typography */}
       {totalProjects > 0 && (
         <div
           style={{
@@ -123,83 +123,95 @@ export default function Dashboard() {
             marginBottom: '28px',
           }}
         >
-          <div
-            className="card"
-            style={{ padding: '16px 20px', background: 'var(--color-surface)' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-text-muted)', marginBottom: '8px' }}>
-              <FolderOpen size={15} />
-              <span className="field-label" style={{ margin: 0 }}>Active Projects</span>
+          <div className="card" style={{ padding: '16px 20px', background: 'var(--color-surface)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>
+              <FolderOpen size={15} style={{ color: 'var(--color-accent)' }} />
+              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-muted)' }}>
+                Active Projects
+              </span>
             </div>
-            <div style={{ fontSize: '24px', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}>
+            <div className="font-display" style={{ fontSize: '26px', fontWeight: 800, color: 'var(--color-text-primary)', letterSpacing: '-0.03em' }}>
               {totalProjects}
             </div>
           </div>
 
-          <div
-            className="card"
-            style={{ padding: '16px 20px', background: 'var(--color-surface)' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-text-muted)', marginBottom: '8px' }}>
-              <BarChart3 size={15} />
-              <span className="field-label" style={{ margin: 0 }}>Total Tasks</span>
+          <div className="card" style={{ padding: '16px 20px', background: 'var(--color-surface)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>
+              <BarChart3 size={15} style={{ color: '#2563EB' }} />
+              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-muted)' }}>
+                Total Tasks
+              </span>
             </div>
-            <div style={{ fontSize: '24px', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}>
+            <div className="font-display" style={{ fontSize: '26px', fontWeight: 800, color: 'var(--color-text-primary)', letterSpacing: '-0.03em' }}>
               {totalTasks}
             </div>
           </div>
 
-          <div
-            className="card"
-            style={{ padding: '16px 20px', background: 'var(--color-surface)' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-text-muted)', marginBottom: '8px' }}>
+          <div className="card" style={{ padding: '16px 20px', background: 'var(--color-surface)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-status-done)', marginBottom: '8px' }}>
               <CheckCircle2 size={15} style={{ color: 'var(--color-status-done)' }} />
-              <span className="field-label" style={{ margin: 0 }}>Completed</span>
+              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-muted)' }}>
+                Completed
+              </span>
             </div>
-            <div style={{ fontSize: '24px', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--color-status-done)' }}>
+            <div className="font-display" style={{ fontSize: '26px', fontWeight: 800, color: 'var(--color-status-done)', letterSpacing: '-0.03em' }}>
               {totalDone}
             </div>
           </div>
 
-          <div
-            className="card"
-            style={{ padding: '16px 20px', background: 'var(--color-surface)' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-text-muted)', marginBottom: '8px' }}>
+          <div className="card" style={{ padding: '16px 20px', background: 'var(--color-surface)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: totalOverdue > 0 ? 'var(--color-danger)' : 'var(--color-text-muted)', marginBottom: '8px' }}>
               <Clock size={15} style={{ color: totalOverdue > 0 ? 'var(--color-danger)' : 'var(--color-text-muted)' }} />
-              <span className="field-label" style={{ margin: 0 }}>Overdue</span>
+              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-muted)' }}>
+                Overdue
+              </span>
             </div>
-            <div style={{ fontSize: '24px', fontWeight: 700, fontFamily: 'var(--font-mono)', color: totalOverdue > 0 ? 'var(--color-danger)' : 'var(--color-text-muted)' }}>
+            <div className="font-display" style={{ fontSize: '26px', fontWeight: 800, color: totalOverdue > 0 ? 'var(--color-danger)' : 'var(--color-text-muted)', letterSpacing: '-0.03em' }}>
               {totalOverdue}
             </div>
           </div>
         </div>
       )}
 
-      {/* Projects List */}
-      <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h2 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+      {/* Projects Section Header */}
+      <div style={{ marginBottom: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h2 className="font-display" style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           Projects ({projects.length})
         </h2>
       </div>
 
       {projects.length === 0 ? (
         <div
+          className="card"
           style={{
-            padding: '56px 24px',
+            padding: '48px 24px',
             textAlign: 'center',
             background: 'var(--color-surface)',
-            border: '1px dashed var(--color-border)',
-            borderRadius: 'var(--radius-xl)',
+            border: '1px border var(--color-border)',
+            borderRadius: 'var(--radius-lg)',
+            boxShadow: 'var(--shadow-sm)',
           }}
         >
-          <FolderOpen size={36} style={{ color: 'var(--color-text-muted)', margin: '0 auto 14px', display: 'block', opacity: 0.4 }} />
-          <h3 style={{ margin: '0 0 6px', fontSize: '15px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+          <div
+            style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '50%',
+              background: 'var(--color-surface-2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 12px',
+              color: 'var(--color-text-muted)',
+            }}
+          >
+            <FolderOpen size={24} />
+          </div>
+          <h3 className="font-display" style={{ margin: '0 0 4px', fontSize: '15px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
             No projects in workspace
           </h3>
-          <p style={{ margin: '0 0 20px', fontSize: '13px', color: 'var(--color-text-muted)', maxWidth: '360px', marginLeft: 'auto', marginRight: 'auto' }}>
-            Get started by creating a project for your team. You can organize tasks into Kanban workflows and add teammates.
+          <p style={{ margin: '0 0 18px', fontSize: '13px', color: 'var(--color-text-secondary)', maxWidth: '340px', marginLeft: 'auto', marginRight: 'auto' }}>
+            Get started by creating a project for your team to organize Kanban workflows.
           </p>
           <button
             onClick={() => setShowNewProject(true)}
@@ -226,33 +238,33 @@ export default function Dashboard() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '20px',
+                  gap: '18px',
                   padding: '16px 20px',
                   textDecoration: 'none',
                 }}
               >
-                {/* Accent stripe indicator */}
+                {/* Project Color Badge */}
                 <div
                   style={{
                     width: '10px',
                     height: '10px',
                     borderRadius: '50%',
                     background: project.color || 'var(--color-accent)',
-                    boxShadow: `0 0 8px ${project.color || 'var(--color-accent)'}`,
+                    boxShadow: `0 0 0 3px ${project.color ? `${project.color}22` : 'rgba(79, 70, 229, 0.15)'}`,
                     flexShrink: 0,
                   }}
                 />
 
                 {/* Main info */}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                    <span style={{ fontSize: '14.5px', fontWeight: 600, color: 'var(--color-text-primary)', letterSpacing: '-0.01em' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+                    <span className="font-display" style={{ fontSize: '15px', fontWeight: 700, color: 'var(--color-text-primary)', letterSpacing: '-0.01em' }}>
                       {project.name}
                     </span>
                     {s?.overdueCount > 0 && (
                       <span
                         className="badge"
-                        style={{ background: 'var(--color-danger-subtle)', color: 'var(--color-danger)', border: '1px solid rgba(224, 82, 82, 0.2)' }}
+                        style={{ background: 'var(--color-danger-subtle)', color: 'var(--color-danger)' }}
                       >
                         <AlertTriangle size={11} />
                         {s.overdueCount} overdue
@@ -261,7 +273,7 @@ export default function Dashboard() {
                   </div>
 
                   {project.description && (
-                    <p style={{ margin: '0 0 10px', fontSize: '12.5px', color: 'var(--color-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <p style={{ margin: '0 0 8px', fontSize: '12.5px', color: 'var(--color-text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {project.description}
                     </p>
                   )}
@@ -271,7 +283,7 @@ export default function Dashboard() {
                     <div className="progress-track" style={{ flex: 1 }}>
                       <div className="progress-fill" style={{ width: `${progress}%` }} />
                     </div>
-                    <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--color-text-muted)', width: '32px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--color-text-muted)', width: '32px' }}>
                       {progress}%
                     </span>
                   </div>
@@ -280,18 +292,18 @@ export default function Dashboard() {
                 {/* Status breakdown pills */}
                 <div style={{ display: 'flex', gap: '12px', flexShrink: 0 }}>
                   {['todo', 'inprogress', 'inreview', 'done'].map((status) => (
-                    <div key={status} style={{ textAlign: 'center', minWidth: '42px' }}>
+                    <div key={status} style={{ textAlign: 'center', minWidth: '40px' }}>
                       <div
+                        className="font-display"
                         style={{
                           fontSize: '14px',
-                          fontFamily: 'var(--font-mono)',
-                          fontWeight: 600,
+                          fontWeight: 700,
                           color: s?.tasksByStatus?.[status] > 0 ? `var(--color-status-${status})` : 'var(--color-text-muted)',
                         }}
                       >
                         {s?.tasksByStatus?.[status] ?? '0'}
                       </div>
-                      <div style={{ fontSize: '9.5px', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '2px' }}>
+                      <div style={{ fontSize: '10px', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '2px' }}>
                         {STATUS_LABELS[status].split(' ')[0]}
                       </div>
                     </div>
@@ -304,15 +316,15 @@ export default function Dashboard() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
-                    color: 'var(--color-text-muted)',
+                    color: 'var(--color-text-secondary)',
                     fontSize: '12px',
-                    fontFamily: 'var(--font-mono)',
+                    fontWeight: 600,
                     flexShrink: 0,
-                    paddingLeft: '8px',
+                    paddingLeft: '12px',
                     borderLeft: '1px solid var(--color-border)',
                   }}
                 >
-                  <Users size={14} />
+                  <Users size={14} style={{ color: 'var(--color-text-muted)' }} />
                   {project.members?.length ?? 0}
                 </div>
 
@@ -327,16 +339,16 @@ export default function Dashboard() {
       {showNewProject && (
         <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowNewProject(false); }}>
           <div className="modal-box animate-scale-in" style={{ maxWidth: '440px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+              <h2 className="font-display" style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                 Create New Project
               </h2>
               <button onClick={() => setShowNewProject(false)} className="btn-icon">
-                <X size={18} />
+                <X size={16} />
               </button>
             </div>
             <form onSubmit={handleCreateProject}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <div>
                   <label htmlFor="proj-name" className="field-label">Project Name *</label>
                   <input
@@ -359,18 +371,18 @@ export default function Dashboard() {
                     onChange={(e) => setNewProject((f) => ({ ...f, description: e.target.value }))}
                     className="input"
                     style={{ resize: 'vertical', lineHeight: 1.5 }}
-                    placeholder="Brief description of project goals and scope…"
+                    placeholder="Brief description of project scope..."
                   />
                 </div>
                 {createError && (
                   <p style={{ margin: 0, fontSize: '12px', color: 'var(--color-danger)' }}>{createError}</p>
                 )}
-                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '8px' }}>
+                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '6px' }}>
                   <button type="button" onClick={() => setShowNewProject(false)} className="btn btn-ghost">
                     Cancel
                   </button>
                   <button id="btn-create-project-confirm" type="submit" disabled={creating} className="btn btn-primary">
-                    {creating ? 'Creating…' : 'Create Project'}
+                    {creating ? 'Creating...' : 'Create Project'}
                   </button>
                 </div>
               </div>
