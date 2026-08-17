@@ -48,6 +48,11 @@ export const AuthProvider = ({ children }) => {
     return newUser;
   }, []);
 
+  const setOAuthToken = useCallback((newToken) => {
+    localStorage.setItem('tf_token', newToken);
+    setToken(newToken);
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem('tf_token');
     setToken(null);
@@ -55,7 +60,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, setOAuthToken }}>
       {children}
     </AuthContext.Provider>
   );
