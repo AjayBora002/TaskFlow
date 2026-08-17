@@ -334,55 +334,71 @@ export default function ProjectBoard() {
         >
           {COLUMNS.map((col) => {
             const colTasks = getColumnTasks(col.id);
+            const totalTasks = filteredTasks.length;
+            const colProgress = totalTasks > 0 ? Math.round((colTasks.length / totalTasks) * 100) : 0;
+
+            const colMeta = {
+              todo:       { color: 'var(--color-status-todo)',       emptyIcon: '○', emptyTitle: 'Backlog is clear', emptyHint: 'New tasks land here. Click + to add one.' },
+              inprogress: { color: 'var(--color-status-inprogress)', emptyIcon: '◎', emptyTitle: 'Nothing active', emptyHint: 'Drag a task here when work begins.' },
+              inreview:   { color: 'var(--color-status-inreview)',   emptyIcon: '◑', emptyTitle: 'No pending reviews', emptyHint: 'Tasks awaiting approval appear here.' },
+              done:       { color: 'var(--color-status-done)',       emptyIcon: '●', emptyTitle: 'No completions yet', emptyHint: 'Finished tasks accumulate here.' },
+            };
+            const meta = colMeta[col.id];
+
             return (
               <div
                 key={col.id}
                 style={{
-                  flex: '0 0 290px',
+                  flex: '0 0 282px',
                   display: 'flex',
                   flexDirection: 'column',
                   maxHeight: '100%',
                   background: 'var(--color-surface)',
                   border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-xl)',
-                  boxShadow: 'var(--shadow-md)',
+                  borderRadius: 'var(--radius-lg)',
                   overflow: 'hidden',
-                  transition: 'border-color 0.2s ease',
+                  transition: 'border-color 0.15s ease',
                 }}
               >
+                {/* Colored top accent bar — the only color on the column */}
+                <div style={{ height: '3px', background: meta.color, flexShrink: 0 }} />
+
                 {/* Column header */}
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '12px 16px',
-                    borderBottom: '1px solid var(--color-border)',
-                    background: 'var(--color-surface-2)',
+                    padding: '10px 14px 8px',
+                    borderBottom: '1px solid var(--color-border-subtle)',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div
-                      style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        background: `var(--color-status-${col.id})`,
-                        boxShadow: `0 0 6px var(--color-status-${col.id})`,
-                      }}
-                    />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
                     <span
                       style={{
-                        fontSize: '12px',
+                        fontSize: '11px',
                         fontWeight: 700,
-                        color: 'var(--color-text-primary)',
+                        color: 'var(--color-text-secondary)',
                         textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
+                        letterSpacing: '0.06em',
+                        fontFamily: 'var(--font-mono)',
                       }}
                     >
                       {col.label}
                     </span>
-                    <span className="badge badge-muted">
+                    <span
+                      style={{
+                        fontSize: '10px',
+                        fontFamily: 'var(--font-mono)',
+                        fontWeight: 600,
+                        color: meta.color,
+                        background: `color-mix(in srgb, ${meta.color} 10%, transparent)`,
+                        padding: '1px 5px',
+                        borderRadius: '2px',
+                        minWidth: '18px',
+                        textAlign: 'center',
+                      }}
+                    >
                       {colTasks.length}
                     </span>
                   </div>
@@ -390,8 +406,11 @@ export default function ProjectBoard() {
                     onClick={() => { setNewTaskStatus(col.id); setShowNewTask(true); }}
                     className="btn-icon"
                     title={`Add task to ${col.label}`}
+                    style={{ opacity: 0.6, transition: 'opacity 0.12s' }}
+                    onMouseEnter={e => e.currentTarget.style.opacity = 1}
+                    onMouseLeave={e => e.currentTarget.style.opacity = 0.6}
                   >
-                    <Plus size={15} />
+                    <Plus size={14} />
                   </button>
                 </div>
 
@@ -405,32 +424,40 @@ export default function ProjectBoard() {
                         flex: 1,
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '10px',
-                        padding: '12px',
+                        gap: '8px',
+                        padding: '10px',
                         overflowY: 'auto',
-                        minHeight: '200px',
+                        minHeight: '180px',
                         background: snapshot.isDraggingOver
-                          ? 'var(--color-accent-subtle)'
+                          ? `color-mix(in srgb, ${meta.color} 5%, transparent)`
                           : 'transparent',
-                        transition: 'background 0.2s ease',
+                        transition: 'background 0.15s ease',
                       }}
                     >
                       {colTasks.length === 0 && !snapshot.isDraggingOver && (
                         <div
                           style={{
-                            padding: '28px 14px',
-                            textAlign: 'center',
-                            fontSize: '12px',
-                            color: 'var(--color-text-muted)',
+                            flex: 1,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '32px 16px',
+                            gap: '8px',
                             border: '1px dashed var(--color-border-subtle)',
                             borderRadius: 'var(--radius-md)',
-                            marginTop: '4px',
+                            marginTop: '2px',
                           }}
                         >
-                          {col.id === 'todo' && 'No tasks queued.'}
-                          {col.id === 'inprogress' && 'No tasks in progress.'}
-                          {col.id === 'inreview' && 'No tasks in review.'}
-                          {col.id === 'done' && 'No completed tasks yet.'}
+                          <span style={{ fontSize: '22px', color: meta.color, opacity: 0.4, lineHeight: 1 }}>
+                            {meta.emptyIcon}
+                          </span>
+                          <span style={{ fontSize: '11.5px', fontWeight: 600, color: 'var(--color-text-secondary)' }}>
+                            {meta.emptyTitle}
+                          </span>
+                          <span style={{ fontSize: '10.5px', color: 'var(--color-text-muted)', textAlign: 'center', lineHeight: 1.5 }}>
+                            {meta.emptyHint}
+                          </span>
                         </div>
                       )}
 

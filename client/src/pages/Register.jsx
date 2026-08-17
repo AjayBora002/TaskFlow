@@ -49,9 +49,14 @@ export default function Register() {
       const res = await api.get(`/auth/${provider}`);
       if (res.data?.url) {
         window.location.href = res.data.url;
+      } else {
+        setError(`Did not receive authorization URL for ${provider}.`);
+        setOauthLoading(false);
       }
     } catch (err) {
-      setError(err.response?.data?.message || `Failed to initiate ${provider} authentication.`);
+      console.error(`OAuth ${provider} error:`, err);
+      const msg = err.response?.data?.message || err.message || `Failed to initiate ${provider} authentication.`;
+      setError(msg);
       setOauthLoading(false);
     }
   };

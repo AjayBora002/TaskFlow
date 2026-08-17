@@ -1,59 +1,60 @@
 @import "tailwindcss";
 
 @theme {
-  --color-base: #0B0D12;
-  --color-surface: #13161F;
-  --color-surface-2: #1A1E2B;
-  --color-surface-3: #222738;
+  --color-base: #F4F1EA;
+  --color-surface: #FCFBF8;
+  --color-surface-2: #EDE8DE;
+  --color-surface-3: #E4DEC9;
   
-  --color-border: #252A3B;
-  --color-border-subtle: #191D29;
-  --color-border-bright: #363D54;
+  --color-border: #E0D9C8;
+  --color-border-subtle: #ECE6D8;
+  --color-border-bright: #C9BF0;
 
-  --color-text-primary: #E2E8F0;
-  --color-text-secondary: #94A3B8;
-  --color-text-muted: #64748B;
-  --color-text-inverse: #0B0D12;
+  --color-text-primary: #2C2923;
+  --color-text-secondary: #6B6557;
+  --color-text-muted: #8F8775;
+  --color-text-inverse: #FCFBF8;
 
-  --color-accent: #10B981;
-  --color-accent-hover: #059669;
-  --color-accent-dim: #047857;
-  --color-accent-subtle: rgba(16, 185, 129, 0.10);
+  --color-accent: #8A9054;
+  --color-accent-hover: #757B43;
+  --color-accent-dim: #626735;
+  --color-accent-subtle: rgba(138, 144, 84, 0.14);
 
-  --color-status-todo: #64748B;
-  --color-status-todo-bg: rgba(100, 116, 139, 0.12);
-  --color-status-inprogress: #3B82F6;
-  --color-status-inprogress-bg: rgba(59, 130, 246, 0.12);
-  --color-status-inreview: #F59E0B;
-  --color-status-inreview-bg: rgba(245, 158, 11, 0.12);
-  --color-status-done: #10B981;
-  --color-status-done-bg: rgba(16, 185, 129, 0.12);
+  --color-status-todo: #7C7769;
+  --color-status-todo-bg: rgba(124, 119, 105, 0.12);
+  --color-status-inprogress: #8A9054;
+  --color-status-inprogress-bg: rgba(138, 144, 84, 0.14);
+  --color-status-inreview: #C49147;
+  --color-status-inreview-bg: rgba(196, 145, 71, 0.14);
+  --color-status-done: #5F8F67;
+  --color-status-done-bg: rgba(95, 143, 103, 0.14);
 
-  --color-priority-low: #64748B;
-  --color-priority-medium: #F59E0B;
-  --color-priority-high: #EF4444;
+  --color-priority-low: #8F8775;
+  --color-priority-medium: #C49147;
+  --color-priority-high: #C0584F;
 
-  --color-danger: #EF4444;
-  --color-danger-subtle: rgba(239, 68, 68, 0.10);
+  --color-danger: #C0584F;
+  --color-danger-subtle: rgba(192, 88, 79, 0.12);
 
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --font-mono: 'IBM Plex Mono', 'Fira Code', monospace;
+  --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Outfit', system-ui, sans-serif;
+  --font-mono: 'DM Mono', monospace;
 
-  --radius-xs: 2px;
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
 
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+  --shadow-sm: 0 2px 6px rgba(44, 41, 35, 0.04);
+  --shadow-md: 0 6px 16px rgba(44, 41, 35, 0.06);
+  --shadow-lg: 0 12px 28px rgba(44, 41, 35, 0.09);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
-  font-size: 13.5px;
+  font-size: 14px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -68,12 +69,12 @@ body {
 }
 
 /* ── Scrollbars ── */
-::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-border-bright); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
 
-/* ── Precise focus visible ── */
+/* ── Focus visible ── */
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 1px;
@@ -81,11 +82,16 @@ body {
 }
 :focus:not(:focus-visible) { outline: none; }
 
-/* ── 3px Left Status Stripe (Signature Detail) ── */
+/* ── Signature Task Serif Titles ── */
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+/* ── Status Stripe ── */
 .status-stripe {
-  width: 3px;
+  width: 4px;
   flex-shrink: 0;
-  border-radius: 2px 0 0 2px;
+  border-radius: 4px 0 0 4px;
 }
 .status-stripe-todo      { background: var(--color-status-todo); }
 .status-stripe-inprogress{ background: var(--color-status-inprogress); }
@@ -100,11 +106,11 @@ body {
   border: none;
   cursor: pointer;
   font-family: var(--font-sans);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   border-radius: var(--radius-sm);
-  padding: 6px 12px;
-  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  padding: 7px 14px;
+  transition: all 0.15s ease;
   white-space: nowrap;
   user-select: none;
 }
@@ -112,20 +118,22 @@ body {
 
 .btn-primary {
   background: var(--color-accent);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.1);
+  color: #FFF;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(138, 144, 84, 0.25);
 }
 .btn-primary:hover {
   background: var(--color-accent-hover);
 }
 
 .btn-ghost {
-  background: var(--color-surface-2);
+  background: var(--color-surface);
   color: var(--color-text-secondary);
   border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
 }
 .btn-ghost:hover {
-  background: var(--color-surface-3);
+  background: var(--color-surface-2);
   border-color: var(--color-border-bright);
   color: var(--color-text-primary);
 }
@@ -133,10 +141,10 @@ body {
 .btn-danger {
   background: var(--color-danger-subtle);
   color: var(--color-danger);
-  border: 1px solid rgba(239,68,68,0.2);
+  border: 1px solid rgba(192, 88, 79, 0.2);
 }
 .btn-danger:hover {
-  background: rgba(239,68,68,0.2);
+  background: rgba(192, 88, 79, 0.2);
   border-color: var(--color-danger);
 }
 
@@ -148,7 +156,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px;
+  padding: 6px;
   border-radius: var(--radius-xs);
   transition: color 0.12s ease, background 0.12s ease;
 }
@@ -157,39 +165,43 @@ body {
 /* ── Form Inputs ── */
 .input {
   width: 100%;
-  background: var(--color-surface-2);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  padding: 7px 10px;
+  padding: 8px 12px;
   color: var(--color-text-primary);
-  font-size: 12.5px;
+  font-size: 13px;
   font-family: var(--font-sans);
   outline: none;
-  transition: border-color 0.12s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.input:hover { border-color: var(--color-border-bright); }
+.input:hover { border-color: var(--color-text-muted); }
 .input:focus {
   border-color: var(--color-accent);
-  background: var(--color-surface);
+  box-shadow: 0 0 0 3px var(--color-accent-subtle);
+  background: #FFF;
 }
 .input::placeholder { color: var(--color-text-muted); }
 
-/* ── Flat Cards ── */
+/* ── Cards ── */
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  transition: border-color 0.12s ease, background 0.12s ease;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 .card:hover {
   border-color: var(--color-border-bright);
+  box-shadow: var(--shadow-md);
 }
 
 /* ── Modals ── */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(5, 7, 10, 0.75);
+  background: rgba(44, 41, 35, 0.45);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -199,38 +211,40 @@ body {
 
 .modal-box {
   background: var(--color-surface);
-  border: 1px solid var(--color-border-bright);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 24px;
   width: 100%;
   box-shadow: var(--shadow-lg);
 }
 
-/* ── Rectangular Tag Badges ── */
+/* ── Tag Badges ── */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: var(--radius-xs);
-  font-size: 10.5px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 700;
   font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
-.badge-accent { background: var(--color-accent-subtle); color: var(--color-accent); border: 1px solid rgba(16,185,129,0.2); }
-.badge-muted  { background: var(--color-surface-3); color: var(--color-text-muted); border: 1px solid var(--color-border); }
+.badge-accent { background: var(--color-accent-subtle); color: var(--color-accent-dim); border: 1px solid rgba(138, 144, 84, 0.25); }
+.badge-muted  { background: var(--color-surface-2); color: var(--color-text-secondary); border: 1px solid var(--color-border); }
 
-/* ── Status Pills (Rectangular Tag Style) ── */
+/* ── Status Pills ── */
 .status-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: var(--radius-xs);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   font-family: var(--font-mono);
-  letter-spacing: 0.01em;
+  letter-spacing: 0.03em;
 }
 .status-todo       { background: var(--color-status-todo-bg);       color: var(--color-status-todo); }
 .status-inprogress { background: var(--color-status-inprogress-bg); color: var(--color-status-inprogress); }
@@ -239,8 +253,8 @@ body {
 
 /* ── Priority Dots ── */
 .priority-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -250,10 +264,22 @@ body {
 
 /* ── Animations ── */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-.animate-fade-in { animation: fadeIn 0.12s ease forwards; }
+.animate-fade-in { animation: fadeIn 0.18s ease forwards; }
+
+/* ── Field Labels ── */
+.field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+}
 
 /* ── Skeleton ── */
 .skeleton {
@@ -263,12 +289,12 @@ body {
 
 /* ── Avatar ── */
 .avatar {
-  border-radius: var(--radius-xs);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-mono);
-  font-weight: 600;
+  font-weight: 700;
   flex-shrink: 0;
   border: 1px solid var(--color-border);
   background: var(--color-surface-3);
@@ -276,21 +302,21 @@ body {
   font-size: 10px;
 }
 .avatar-accent {
-  border-color: var(--color-accent-dim);
-  background: var(--color-accent-subtle);
-  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background: #D9DEB0;
+  color: var(--color-accent-dim);
 }
 
 /* ── Progress bar ── */
 .progress-track {
-  height: 3px;
-  background: var(--color-surface-3);
-  border-radius: 1.5px;
+  height: 6px;
+  background: var(--color-surface-2);
+  border-radius: 3px;
   overflow: hidden;
 }
 .progress-fill {
   height: 100%;
   background: var(--color-accent);
-  border-radius: 1.5px;
+  border-radius: 3px;
   transition: width 0.3s ease;
 }

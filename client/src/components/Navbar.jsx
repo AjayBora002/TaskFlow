@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from './NotificationBell';
-import { LogOut, LayoutDashboard, Layers, Sparkles } from 'lucide-react';
+import { LogOut, LayoutDashboard } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -22,16 +22,15 @@ export default function Navbar() {
   return (
     <header
       style={{
-        height: '52px',
-        background: 'var(--color-surface)',
-        borderBottom: '1px solid var(--color-border)',
+        height: '56px',
+        background: '#F4F1EA',
+        borderBottom: '1px solid #E2DCD0',
         display: 'flex',
         alignItems: 'center',
-        padding: '0 20px',
+        padding: '0 24px',
         gap: '16px',
         flexShrink: 0,
         zIndex: 50,
-        boxShadow: 'var(--shadow-sm)',
       }}
     >
       {/* Brand logo */}
@@ -40,67 +39,52 @@ export default function Navbar() {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
+          gap: '10px',
           textDecoration: 'none',
-          color: 'var(--color-text-primary)',
-          fontWeight: 600,
-          fontSize: '14.5px',
-          letterSpacing: '-0.02em',
+          color: '#2C2923',
         }}
       >
         <span
           style={{
-            width: '26px',
-            height: '26px',
-            background: 'linear-gradient(135deg, var(--color-accent), var(--color-accent-dim))',
-            borderRadius: 'var(--radius-sm)',
+            width: '28px',
+            height: '28px',
+            background: '#8A9054',
+            borderRadius: '8px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '11px',
+            fontSize: '12px',
             fontWeight: 800,
-            color: '#fff',
+            color: '#FFF',
             fontFamily: 'var(--font-mono)',
-            boxShadow: '0 2px 6px rgba(47,158,111,0.3)',
           }}
         >
-          TF
+          T
         </span>
-        <span style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>TaskFlow</span>
-        <span
-          style={{
-            fontSize: '9.5px',
-            fontFamily: 'var(--font-mono)',
-            padding: '1px 5px',
-            borderRadius: 'var(--radius-xs)',
-            background: 'var(--color-accent-subtle)',
-            color: 'var(--color-accent)',
-            fontWeight: 600,
-            border: '1px solid rgba(47,158,111,0.2)',
-          }}
-        >
-          TEAM
+        <span style={{ fontWeight: 700, fontSize: '16px', fontFamily: 'var(--font-serif)', letterSpacing: '-0.01em' }}>
+          TaskFlow
         </span>
       </Link>
 
       {/* Vertical separator */}
-      <div style={{ width: '1px', height: '18px', background: 'var(--color-border)' }} />
+      <div style={{ width: '1px', height: '18px', background: '#E2DCD0' }} />
 
       {/* Navigation items */}
-      <nav style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+      <nav style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
         <Link
           to="/"
           className="btn"
           style={{
-            background: isDashboardActive ? 'var(--color-surface-2)' : 'transparent',
-            color: isDashboardActive ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
-            border: isDashboardActive ? '1px solid var(--color-border-bright)' : '1px solid transparent',
-            padding: '5px 10px',
-            fontSize: '12px',
+            background: isDashboardActive ? '#EDE8DE' : 'transparent',
+            color: isDashboardActive ? '#2C2923' : '#6B6557',
+            border: isDashboardActive ? '1px solid #D6CEBC' : '1px solid transparent',
+            padding: '6px 12px',
+            fontSize: '13px',
+            borderRadius: '8px',
           }}
         >
-          <LayoutDashboard size={14} style={{ color: isDashboardActive ? 'var(--color-accent)' : 'inherit' }} />
-          Projects
+          <LayoutDashboard size={14} style={{ color: isDashboardActive ? '#8A9054' : 'inherit' }} />
+          Dashboard
         </Link>
       </nav>
 
@@ -115,20 +99,20 @@ export default function Navbar() {
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          padding: '4px 8px 4px 4px',
-          background: 'var(--color-surface-2)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-full)',
+          padding: '4px 10px 4px 4px',
+          background: '#EDE8DE',
+          border: '1px solid #E2DCD0',
+          borderRadius: '20px',
         }}
       >
-        <div className="avatar avatar-accent" style={{ width: '24px', height: '24px', fontSize: '9.5px' }}>
+        <div className="avatar avatar-accent" style={{ width: '24px', height: '24px', fontSize: '9px' }}>
           {initials}
         </div>
         <span
           style={{
-            fontSize: '12px',
-            fontWeight: 500,
-            color: 'var(--color-text-primary)',
+            fontSize: '12.5px',
+            fontWeight: 600,
+            color: '#2C2923',
             maxWidth: '120px',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
