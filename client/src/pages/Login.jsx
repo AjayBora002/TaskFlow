@@ -111,9 +111,6 @@ export default function Login() {
           >
             Sign in to TaskFlow
           </h1>
-          <p style={{ margin: '6px 0 0', fontSize: '12px', color: 'var(--color-text-muted)' }}>
-            Demo: alex@taskflow.dev / password123
-          </p>
         </div>
 
         {/* OAuth 2.0 Security Buttons */}
