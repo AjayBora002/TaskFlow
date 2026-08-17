@@ -59,11 +59,12 @@ exports.register = async (req, res) => {
     const token = signToken(user._id);
     res.status(201).json({ token, user });
   } catch (err) {
+    console.error('Registration Error Details:', err);
     if (err.name === 'ValidationError') {
       const messages = Object.values(err.errors).map((e) => e.message);
       return res.status(400).json({ message: messages.join(', ') });
     }
-    res.status(500).json({ message: 'Server error during registration' });
+    res.status(500).json({ message: err.message || 'Server error during registration' });
   }
 };
 

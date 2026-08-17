@@ -36,7 +36,8 @@ export default function Register() {
       await register(form.name, form.email, form.password);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      const msg = err.response?.data?.message || err.message || 'Registration failed';
+      setError(msg);
     } finally {
       setLoading(false);
     }
