@@ -13,16 +13,14 @@ async function connectDB() {
   }
 
   if (!cached.promise) {
-    const opts = {
-      bufferCommands: true,
-    };
-
     const mongoUri = process.env.MONGO_URI;
     if (!mongoUri) {
-      throw new Error('MONGO_URI is missing from Vercel Environment Variables.');
+      throw new Error('MONGO_URI environment variable is missing in Vercel settings.');
     }
 
-    cached.promise = mongoose.connect(mongoUri, opts).then((mongooseInstance) => {
+    cached.promise = mongoose.connect(mongoUri, {
+      serverSelectionTimeoutMS: 5000,
+    }).then((mongooseInstance) => {
       console.log('✅ Serverless MongoDB Connected');
       return mongooseInstance;
     });
@@ -44,8 +42,7 @@ module.exports = async (req, res) => {
   } catch (err) {
     console.error('❌ Vercel Serverless Database Connection Error:', err.message);
     return res.status(500).json({
-      message: 'Database connection failed on serverless backend. Please check MONGO_URI in Vercel.',
-      error: err.message,
+      message: `Database Connection Error: ${err.message}. If MONGO_URI is added, please check MongoDB Atlas Network Access IP Whitelist (0.0.0.0/0).`,
     });
   }
 
