@@ -5,6 +5,9 @@ import { Plus, Settings, Users, X, UserPlus, Trash2, AlertCircle, Sparkles, Filt
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import TaskCard from '../components/TaskCard';
+import AICommandBar from '../components/AICommandBar';
+import AIAuditPanel from '../components/AIAuditPanel';
+import AIDigestModal from '../components/AIDigestModal';
 
 const COLUMNS = [
   { id: 'todo', label: 'To Do' },
@@ -239,6 +242,8 @@ export default function ProjectBoard() {
 
         {/* Actions */}
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <AICommandBar projectId={projectId} onTaskCreated={(newTask) => setTasks((prev) => [...prev, newTask])} />
+          <AIDigestModal projectId={projectId} projectName={project.name} />
           <button
             id="btn-new-task"
             onClick={() => { setNewTaskStatus('todo'); setShowNewTask(true); }}
@@ -257,6 +262,11 @@ export default function ProjectBoard() {
             Settings
           </button>
         </div>
+      </div>
+
+      {/* AI Telemetry Audit Panel */}
+      <div style={{ padding: '0 24px' }}>
+        <AIAuditPanel projectId={projectId} />
       </div>
 
       {/* Kanban Drag and Drop Columns */}

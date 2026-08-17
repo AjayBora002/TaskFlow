@@ -96,7 +96,9 @@ export default function TaskCard({ task, projectId, isDragging }) {
             </span>
           ) : (
             <span style={{ fontSize: '10.5px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
-              No due date
+              {task.subtasks?.length > 0
+                ? `${task.subtasks.filter((s) => s.completed).length}/${task.subtasks.length} subtasks`
+                : 'No due date'}
             </span>
           )}
 

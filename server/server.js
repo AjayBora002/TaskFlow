@@ -8,6 +8,7 @@ const projectRoutes = require('./routes/projects');
 const taskRoutes = require('./routes/tasks');
 const commentRoutes = require('./routes/comments');
 const notificationRoutes = require('./routes/notifications');
+const aiRoutes = require('./routes/ai');
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/projects/:projectId/tasks', taskRoutes);
 app.use('/api/projects/:projectId/tasks/:taskId/comments', commentRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));

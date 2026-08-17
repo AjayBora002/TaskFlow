@@ -97,7 +97,7 @@ exports.updateTask = async (req, res) => {
     const isMember = task.project.members.map(String).includes(String(req.user._id));
     if (!isMember) return res.status(403).json({ message: 'Access denied' });
 
-    const { title, description, assignee, priority, dueDate, status } = req.body;
+    const { title, description, assignee, priority, dueDate, status, subtasks } = req.body;
     const prevAssignee = task.assignee ? String(task.assignee) : null;
 
     // Status transition validation
@@ -118,6 +118,7 @@ exports.updateTask = async (req, res) => {
     if (priority !== undefined) task.priority = priority;
     if (dueDate !== undefined) task.dueDate = dueDate || null;
     if (status !== undefined) task.status = status;
+    if (subtasks !== undefined) task.subtasks = subtasks;
 
     await task.save();
     await task.populate('assignee reporter', 'name email');

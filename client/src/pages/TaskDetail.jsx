@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { format } from 'date-fns';
-import { ArrowLeft, Trash2, ChevronRight, Save, X, Clock, Calendar, User, Tag } from 'lucide-react';
+import { ArrowLeft, Trash2, ChevronRight, Save, X, Clock, Calendar, User, Tag, Sparkles, Loader2 } from 'lucide-react';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import CommentThread from '../components/CommentThread';
+import SubtaskDecomposer from '../components/SubtaskDecomposer';
 
 const STATUSES = [
   { id: 'todo', label: 'To Do' },
@@ -29,6 +30,29 @@ export default function TaskDetail() {
   const [editForm, setEditForm] = useState({});
   const [saveError, setSaveError] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [generatingSpec, setGeneratingSpec] = useState(false);
+
+  const handleGenerateSpec = async () => {
+    setGeneratingSpec(true);
+    try {
+      const res = await api.post('/ai/generate-spec', {
+        title: task.title,
+        brief: task.description,
+      });
+      const updatedDesc = task.description
+        ? `${task.description}\n\n${res.data.spec}`
+        : res.data.spec;
+      const saveRes = await api.put(`/projects/${projectId}/tasks/${taskId}`, {
+        description: updatedDesc,
+      });
+      setTask(saveRes.data);
+      setEditForm((f) => ({ ...f, description: updatedDesc }));
+    } catch (err) {
+      console.error('Spec generation error:', err);
+    } finally {
+      setGeneratingSpec(false);
+    }
+  };
 
   useEffect(() => {
     fetchTask();
@@ -176,6 +200,15 @@ export default function TaskDetail() {
               >
                 Edit Task
               </button>
+              <button
+                onClick={handleGenerateSpec}
+                disabled={generatingSpec}
+                className="btn btn-ghost"
+                style={{ gap: '5px' }}
+              >
+                {generatingSpec ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} style={{ color: 'var(--color-accent)' }} />}
+                {generatingSpec ? 'Generating Spec...' : 'AI Generate Spec'}
+              </button>
               {!deleteConfirm ? (
                 <button
                   id="btn-delete-task"
@@ -226,8 +259,10 @@ export default function TaskDetail() {
         )}
 
         {/* Task Description */}
-        <div style={{ marginBottom: '32px' }} className="card" style={{ padding: '20px', background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
-          <label className="field-label" style={{ marginBottom: '8px' }}>Description</label>
+        <div className="card" style={{ padding: '20px', background: 'var(--color-surface)', border: '1px solid var(--color-border)', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <label className="field-label" style={{ margin: 0 }}>Description</label>
+          </div>
           {editing ? (
             <textarea
               id="task-desc-edit"
@@ -244,10 +279,18 @@ export default function TaskDetail() {
             </p>
           ) : (
             <p style={{ margin: 0, fontSize: '13px', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
-              No description provided. Click "Edit Task" to add context.
+              No description provided. Click "Edit Task" or "AI Generate Spec" to add context.
             </p>
           )}
         </div>
+
+        {/* Subtask & Checklist Decomposer */}
+        <SubtaskDecomposer
+          taskId={taskId}
+          projectId={projectId}
+          subtasks={task.subtasks || []}
+          onSubtasksUpdated={(updated) => setTask((prev) => ({ ...prev, subtasks: updated }))}
+        />
 
         {/* Comment Thread Component */}
         <CommentThread
