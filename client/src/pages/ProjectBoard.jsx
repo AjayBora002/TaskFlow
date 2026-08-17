@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Plus, Settings, Users, X, UserPlus, Trash2, AlertCircle, Sparkles, Filter } from 'lucide-react';
+import { Plus, Settings, Users, X, UserPlus, Trash2, AlertCircle, Sparkles, Search, Filter, CheckCircle2 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import TaskCard from '../components/TaskCard';
@@ -32,6 +33,10 @@ export default function ProjectBoard() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [transitonError, setTransitionError] = useState('');
+
+  // Interactive Search & Priority Filter
+  const [searchQuery, setSearchQuery] = useState('');
+  const [priorityFilter, setPriorityFilter] = useState('all');
 
   // Modals
   const [showNewTask, setShowNewTask] = useState(false);
@@ -67,8 +72,25 @@ export default function ProjectBoard() {
     }
   };
 
+  // Filter tasks dynamically
+  const filteredTasks = tasks.filter((t) => {
+    const matchesSearch = t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (t.description && t.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesPriority = priorityFilter === 'all' || t.priority === priorityFilter;
+    return matchesSearch && matchesPriority;
+  });
+
   const getColumnTasks = (status) =>
-    tasks.filter((t) => t.status === status).sort((a, b) => a.order - b.order);
+    filteredTasks.filter((t) => t.status === status).sort((a, b) => a.order - b.order);
+
+  const triggerCelebration = () => {
+    confetti({
+      particleCount: 70,
+      spread: 60,
+      origin: { y: 0.7 },
+      colors: ['#2EA043', '#3FB950', '#388BFD', '#D29922'],
+    });
+  };
 
   const onDragEnd = async (result) => {
     setTransitionError('');
@@ -89,6 +111,11 @@ export default function ProjectBoard() {
         const statusLabel = (s) => COLUMNS.find((c) => c.id === s)?.label || s;
         setTransitionError(`Cannot jump task from "${statusLabel(oldStatus)}" to "${statusLabel(newStatus)}". Tasks must advance step-by-step.`);
         return;
+      }
+
+      // Celebrate when moving to Done!
+      if (newStatus === 'done') {
+        triggerCelebration();
       }
     }
 
@@ -133,6 +160,8 @@ export default function ProjectBoard() {
       setTasks((prev) => [...prev, res.data]);
       setNewTask({ title: '', description: '', priority: 'medium', assignee: '', dueDate: '' });
       setShowNewTask(false);
+
+      if (newTaskStatus === 'done') triggerCelebration();
     } catch (err) {
       setTaskError(err.response?.data?.message || 'Failed to create task');
     } finally {
@@ -168,7 +197,7 @@ export default function ProjectBoard() {
 
   if (loading) {
     return (
-      <div style={{ padding: '24px', display: 'flex', gap: '16px' }}>
+      <div style={{ padding: '24px', display: 'flex', gap: '16px' }} className="ambient-bg">
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="skeleton" style={{ flex: 1, height: '400px', borderRadius: 'var(--radius-lg)' }} />
         ))}
@@ -179,27 +208,28 @@ export default function ProjectBoard() {
   if (!project) return null;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }} className="board-bg">
-      {/* Board Header */}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }} className="ambient-bg animate-slide-up">
+      {/* Board Header Bar */}
       <div
+        className="glass-panel"
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: '16px',
-          padding: '14px 24px',
+          padding: '12px 24px',
           borderBottom: '1px solid var(--color-border)',
-          background: 'var(--color-surface)',
           flexShrink: 0,
         }}
       >
+        {/* Project Title */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
           <div
             style={{
               width: '12px',
               height: '12px',
               borderRadius: '50%',
-              background: project.color || 'var(--color-accent)',
-              boxShadow: `0 0 10px ${project.color || 'var(--color-accent)'}`,
+              background: project.color || 'var(--color-accent-bright)',
+              boxShadow: `0 0 12px ${project.color || 'var(--color-accent-bright)'}`,
               flexShrink: 0,
             }}
           />
@@ -207,38 +237,35 @@ export default function ProjectBoard() {
             <h1 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--color-text-primary)', letterSpacing: '-0.01em' }}>
               {project.name}
             </h1>
-            {project.description && (
-              <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--color-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {project.description}
-              </p>
-            )}
           </div>
         </div>
 
-        {/* Transition Error Alert Banner */}
-        {transitonError && (
-          <div
-            className="animate-fade-in"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '6px 12px',
-              background: 'var(--color-danger-subtle)',
-              border: '1px solid rgba(224, 82, 82, 0.3)',
-              borderRadius: 'var(--radius-md)',
-              fontSize: '12px',
-              color: 'var(--color-danger)',
-              maxWidth: '440px',
-            }}
-          >
-            <AlertCircle size={14} style={{ flexShrink: 0 }} />
-            <span style={{ flex: 1, minWidth: 0 }}>{transitonError}</span>
-            <button onClick={() => setTransitionError('')} className="btn-icon" style={{ padding: '2px' }}>
-              <X size={12} />
-            </button>
+        {/* Search & Priority Filter Controls */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ position: 'relative', width: '180px' }}>
+            <Search size={13} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search tasks..."
+              className="input"
+              style={{ paddingLeft: '28px', paddingRight: '10px', height: '30px', fontSize: '12px' }}
+            />
           </div>
-        )}
+
+          <select
+            value={priorityFilter}
+            onChange={(e) => setPriorityFilter(e.target.value)}
+            className="input"
+            style={{ width: '110px', height: '30px', fontSize: '12px', padding: '0 8px' }}
+          >
+            <option value="all">All Priorities</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
 
         {/* Actions */}
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -259,13 +286,37 @@ export default function ProjectBoard() {
             title="Project Settings"
           >
             <Settings size={15} />
-            Settings
           </button>
         </div>
       </div>
 
-      {/* AI Telemetry Audit Panel */}
-      <div style={{ padding: '0 24px' }}>
+      {/* Transition Alert */}
+      {transitonError && (
+        <div
+          className="animate-slide-up"
+          style={{
+            margin: '12px 24px 0',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 14px',
+            background: 'var(--color-danger-subtle)',
+            border: '1px solid rgba(248, 81, 73, 0.3)',
+            borderRadius: 'var(--radius-md)',
+            fontSize: '12px',
+            color: 'var(--color-danger)',
+          }}
+        >
+          <AlertCircle size={15} style={{ flexShrink: 0 }} />
+          <span style={{ flex: 1, minWidth: 0 }}>{transitonError}</span>
+          <button onClick={() => setTransitionError('')} className="btn-icon" style={{ padding: '2px' }}>
+            <X size={13} />
+          </button>
+        </div>
+      )}
+
+      {/* AI Telemetry Audit Collapsible Panel */}
+      <div style={{ padding: '12px 24px 0' }}>
         <AIAuditPanel projectId={projectId} />
       </div>
 
@@ -276,7 +327,7 @@ export default function ProjectBoard() {
             flex: 1,
             display: 'flex',
             gap: '16px',
-            padding: '20px 24px',
+            padding: '16px 24px 24px',
             overflowX: 'auto',
             alignItems: 'flex-start',
           }}
@@ -287,15 +338,16 @@ export default function ProjectBoard() {
               <div
                 key={col.id}
                 style={{
-                  flex: '0 0 280px',
+                  flex: '0 0 290px',
                   display: 'flex',
                   flexDirection: 'column',
                   maxHeight: '100%',
                   background: 'var(--color-surface)',
                   border: '1px solid var(--color-border)',
                   borderRadius: 'var(--radius-xl)',
-                  boxShadow: 'var(--shadow-sm)',
+                  boxShadow: 'var(--shadow-md)',
                   overflow: 'hidden',
+                  transition: 'border-color 0.2s ease',
                 }}
               >
                 {/* Column header */}
@@ -304,7 +356,7 @@ export default function ProjectBoard() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '12px 14px',
+                    padding: '12px 16px',
                     borderBottom: '1px solid var(--color-border)',
                     background: 'var(--color-surface-2)',
                   }}
@@ -316,12 +368,13 @@ export default function ProjectBoard() {
                         height: '8px',
                         borderRadius: '50%',
                         background: `var(--color-status-${col.id})`,
+                        boxShadow: `0 0 6px var(--color-status-${col.id})`,
                       }}
                     />
                     <span
                       style={{
                         fontSize: '12px',
-                        fontWeight: 600,
+                        fontWeight: 700,
                         color: 'var(--color-text-primary)',
                         textTransform: 'uppercase',
                         letterSpacing: '0.05em',
@@ -352,10 +405,10 @@ export default function ProjectBoard() {
                         flex: 1,
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '8px',
-                        padding: '10px',
+                        gap: '10px',
+                        padding: '12px',
                         overflowY: 'auto',
-                        minHeight: '180px',
+                        minHeight: '200px',
                         background: snapshot.isDraggingOver
                           ? 'var(--color-accent-subtle)'
                           : 'transparent',
@@ -365,7 +418,7 @@ export default function ProjectBoard() {
                       {colTasks.length === 0 && !snapshot.isDraggingOver && (
                         <div
                           style={{
-                            padding: '24px 12px',
+                            padding: '28px 14px',
                             textAlign: 'center',
                             fontSize: '12px',
                             color: 'var(--color-text-muted)',
@@ -374,10 +427,10 @@ export default function ProjectBoard() {
                             marginTop: '4px',
                           }}
                         >
-                          {col.id === 'todo' && 'No tasks queued yet.'}
-                          {col.id === 'inprogress' && 'No work in progress.'}
-                          {col.id === 'inreview' && 'No tasks under review.'}
-                          {col.id === 'done' && 'No tasks completed.'}
+                          {col.id === 'todo' && 'No tasks queued.'}
+                          {col.id === 'inprogress' && 'No tasks in progress.'}
+                          {col.id === 'inreview' && 'No tasks in review.'}
+                          {col.id === 'done' && 'No completed tasks yet.'}
                         </div>
                       )}
 
@@ -411,10 +464,10 @@ export default function ProjectBoard() {
       {/* New Task Modal */}
       {showNewTask && (
         <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowNewTask(false); }}>
-          <div className="modal-box animate-scale-in" style={{ maxWidth: '480px' }}>
+          <div className="modal-box animate-scale-up" style={{ maxWidth: '480px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-                New Task
+              <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                Create New Task
               </h2>
               <button onClick={() => setShowNewTask(false)} className="btn-icon"><X size={18} /></button>
             </div>
@@ -430,7 +483,7 @@ export default function ProjectBoard() {
                     value={newTask.title}
                     onChange={(e) => setNewTask((f) => ({ ...f, title: e.target.value }))}
                     className="input"
-                    placeholder="Task summary or requirement..."
+                    placeholder="Task summary or feature title..."
                   />
                 </div>
                 <div>
@@ -442,7 +495,7 @@ export default function ProjectBoard() {
                     onChange={(e) => setNewTask((f) => ({ ...f, description: e.target.value }))}
                     className="input"
                     style={{ resize: 'vertical', lineHeight: 1.5 }}
-                    placeholder="Add details, criteria, or context..."
+                    placeholder="Technical specifications or task details..."
                   />
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
@@ -500,7 +553,7 @@ export default function ProjectBoard() {
                 {taskError && (
                   <p style={{ margin: 0, fontSize: '12px', color: 'var(--color-danger)' }}>{taskError}</p>
                 )}
-                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '6px' }}>
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '8px' }}>
                   <button type="button" onClick={() => setShowNewTask(false)} className="btn btn-ghost">Cancel</button>
                   <button id="btn-create-task-confirm" type="submit" disabled={creatingTask} className="btn btn-primary">
                     {creatingTask ? 'Creating...' : 'Create Task'}
@@ -515,9 +568,9 @@ export default function ProjectBoard() {
       {/* Settings Modal */}
       {showSettings && (
         <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowSettings(false); }}>
-          <div className="modal-box animate-scale-in" style={{ maxWidth: '460px' }}>
+          <div className="modal-box animate-scale-up" style={{ maxWidth: '460px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+              <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                 Project Settings
               </h2>
               <button onClick={() => setShowSettings(false)} className="btn-icon"><X size={18} /></button>

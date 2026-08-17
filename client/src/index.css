@@ -1,62 +1,59 @@
 @import "tailwindcss";
 
 @theme {
-  --color-base: #161B22;
-  --color-surface: #1E2530;
-  --color-surface-2: #242D3A;
-  --color-surface-3: #2A3548;
-  --color-border: #2D3F55;
-  --color-border-subtle: #1E2A3A;
-  --color-border-bright: #3D5070;
+  --color-base: #0B0D12;
+  --color-surface: #13161F;
+  --color-surface-2: #1A1E2B;
+  --color-surface-3: #222738;
+  
+  --color-border: #252A3B;
+  --color-border-subtle: #191D29;
+  --color-border-bright: #363D54;
 
-  --color-text-primary: #D4DCE8;
-  --color-text-secondary: #8895A8;
-  --color-text-muted: #5A6880;
-  --color-text-inverse: #161B22;
+  --color-text-primary: #E2E8F0;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+  --color-text-inverse: #0B0D12;
 
-  --color-accent: #2F9E6F;
-  --color-accent-hover: #25875E;
-  --color-accent-dim: #1A6B47;
-  --color-accent-subtle: rgba(47, 158, 111, 0.10);
-  --color-accent-glow: rgba(47, 158, 111, 0.20);
+  --color-accent: #10B981;
+  --color-accent-hover: #059669;
+  --color-accent-dim: #047857;
+  --color-accent-subtle: rgba(16, 185, 129, 0.10);
 
-  --color-status-todo: #5A7090;
-  --color-status-todo-bg: rgba(90, 112, 144, 0.10);
-  --color-status-inprogress: #3B82C4;
-  --color-status-inprogress-bg: rgba(59, 130, 196, 0.10);
-  --color-status-inreview: #C4892B;
-  --color-status-inreview-bg: rgba(196, 137, 43, 0.10);
-  --color-status-done: #2EA572;
-  --color-status-done-bg: rgba(46, 165, 114, 0.10);
+  --color-status-todo: #64748B;
+  --color-status-todo-bg: rgba(100, 116, 139, 0.12);
+  --color-status-inprogress: #3B82F6;
+  --color-status-inprogress-bg: rgba(59, 130, 246, 0.12);
+  --color-status-inreview: #F59E0B;
+  --color-status-inreview-bg: rgba(245, 158, 11, 0.12);
+  --color-status-done: #10B981;
+  --color-status-done-bg: rgba(16, 185, 129, 0.12);
 
-  --color-priority-low: #5A7090;
-  --color-priority-medium: #C4892B;
-  --color-priority-high: #E05252;
+  --color-priority-low: #64748B;
+  --color-priority-medium: #F59E0B;
+  --color-priority-high: #EF4444;
 
-  --color-danger: #E05252;
-  --color-danger-subtle: rgba(224, 82, 82, 0.08);
+  --color-danger: #EF4444;
+  --color-danger-subtle: rgba(239, 68, 68, 0.10);
 
-  --font-sans: 'DM Sans', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Fira Code', monospace;
 
   --radius-xs: 2px;
   --radius-sm: 4px;
   --radius-md: 6px;
-  --radius-lg: 10px;
-  --radius-xl: 14px;
-  --radius-full: 9999px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
 
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.2);
-  --shadow-lg: 0 8px 28px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3);
-  --shadow-xl: 0 16px 48px rgba(0,0,0,0.6), 0 8px 16px rgba(0,0,0,0.3);
-  --shadow-glow: 0 0 0 1px var(--color-accent-glow), 0 4px 20px var(--color-accent-subtle);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
-  font-size: 14px;
+  font-size: 13.5px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -67,41 +64,35 @@ body {
   color: var(--color-text-primary);
   font-family: var(--font-sans);
   line-height: 1.5;
+  letter-spacing: -0.01em;
 }
 
-/* ── Scrollbar ── */
+/* ── Scrollbars ── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-border-bright); }
 
-/* ── Focus ── */
+/* ── Precise focus visible ── */
 :focus-visible {
   outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
+  outline-offset: 1px;
+  border-radius: var(--radius-xs);
 }
 :focus:not(:focus-visible) { outline: none; }
 
-/* ── Status stripe — signature detail ── */
+/* ── 3px Left Status Stripe (Signature Detail) ── */
 .status-stripe {
   width: 3px;
   flex-shrink: 0;
   border-radius: 2px 0 0 2px;
-  transition: width 0.15s ease;
 }
 .status-stripe-todo      { background: var(--color-status-todo); }
 .status-stripe-inprogress{ background: var(--color-status-inprogress); }
 .status-stripe-inreview  { background: var(--color-status-inreview); }
 .status-stripe-done      { background: var(--color-status-done); }
 
-/* ── Interactive base ── */
-.interactive {
-  transition: background 0.12s ease, border-color 0.12s ease,
-              box-shadow 0.12s ease, color 0.12s ease, transform 0.1s ease;
-}
-
-/* ── Buttons ── */
+/* ── Precision Buttons ── */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -109,34 +100,32 @@ body {
   border: none;
   cursor: pointer;
   font-family: var(--font-sans);
-  font-size: 12.5px;
-  font-weight: 500;
-  border-radius: var(--radius-md);
-  padding: 7px 14px;
-  transition: all 0.12s ease;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
   white-space: nowrap;
   user-select: none;
 }
-.btn:active { transform: scale(0.975); }
+.btn:active { transform: translateY(1px); }
 
 .btn-primary {
   background: var(--color-accent);
   color: #fff;
-  box-shadow: 0 1px 3px rgba(47,158,111,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.1);
 }
 .btn-primary:hover {
   background: var(--color-accent-hover);
-  box-shadow: 0 2px 8px rgba(47,158,111,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
-  transform: translateY(-1px);
 }
 
 .btn-ghost {
-  background: transparent;
+  background: var(--color-surface-2);
   color: var(--color-text-secondary);
   border: 1px solid var(--color-border);
 }
 .btn-ghost:hover {
-  background: var(--color-surface-2);
+  background: var(--color-surface-3);
   border-color: var(--color-border-bright);
   color: var(--color-text-primary);
 }
@@ -144,11 +133,11 @@ body {
 .btn-danger {
   background: var(--color-danger-subtle);
   color: var(--color-danger);
-  border: 1px solid rgba(224,82,82,0.2);
+  border: 1px solid rgba(239,68,68,0.2);
 }
 .btn-danger:hover {
-  background: rgba(224,82,82,0.15);
-  border-color: rgba(224,82,82,0.4);
+  background: rgba(239,68,68,0.2);
+  border-color: var(--color-danger);
 }
 
 .btn-icon {
@@ -160,49 +149,47 @@ body {
   align-items: center;
   justify-content: center;
   padding: 5px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-xs);
   transition: color 0.12s ease, background 0.12s ease;
 }
 .btn-icon:hover { color: var(--color-text-primary); background: var(--color-surface-2); }
 
-/* ── Inputs ── */
+/* ── Form Inputs ── */
 .input {
   width: 100%;
   background: var(--color-surface-2);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 8px 11px;
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
   color: var(--color-text-primary);
-  font-size: 13px;
+  font-size: 12.5px;
   font-family: var(--font-sans);
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.12s ease;
 }
 .input:hover { border-color: var(--color-border-bright); }
 .input:focus {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(47,158,111,0.12);
+  background: var(--color-surface);
 }
 .input::placeholder { color: var(--color-text-muted); }
 
-/* ── Cards ── */
+/* ── Flat Cards ── */
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  border-radius: var(--radius-md);
+  transition: border-color 0.12s ease, background 0.12s ease;
 }
 .card:hover {
   border-color: var(--color-border-bright);
-  box-shadow: var(--shadow-md);
 }
 
-/* ── Modal overlay ── */
+/* ── Modals ── */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(10, 14, 20, 0.75);
-  backdrop-filter: blur(4px);
+  background: rgba(5, 7, 10, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -213,98 +200,77 @@ body {
 .modal-box {
   background: var(--color-surface);
   border: 1px solid var(--color-border-bright);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   padding: 24px;
   width: 100%;
-  box-shadow: var(--shadow-xl);
+  box-shadow: var(--shadow-lg);
 }
 
-/* ── Labels ── */
-.field-label {
-  display: block;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 5px;
-}
-
-/* ── Badge ── */
+/* ── Rectangular Tag Badges ── */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 7px;
-  border-radius: var(--radius-full);
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
   font-size: 10.5px;
-  font-weight: 600;
+  font-weight: 500;
   font-family: var(--font-mono);
 }
-.badge-accent { background: var(--color-accent-subtle); color: var(--color-accent); }
-.badge-muted  { background: var(--color-surface-3); color: var(--color-text-muted); }
+.badge-accent { background: var(--color-accent-subtle); color: var(--color-accent); border: 1px solid rgba(16,185,129,0.2); }
+.badge-muted  { background: var(--color-surface-3); color: var(--color-text-muted); border: 1px solid var(--color-border); }
 
-/* ── Divider ── */
-.divider {
-  height: 1px;
-  background: var(--color-border);
-  margin: 16px 0;
+/* ── Status Pills (Rectangular Tag Style) ── */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  letter-spacing: 0.01em;
 }
+.status-todo       { background: var(--color-status-todo-bg);       color: var(--color-status-todo); }
+.status-inprogress { background: var(--color-status-inprogress-bg); color: var(--color-status-inprogress); }
+.status-inreview   { background: var(--color-status-inreview-bg);   color: var(--color-status-inreview); }
+.status-done       { background: var(--color-status-done-bg);       color: var(--color-status-done); }
+
+/* ── Priority Dots ── */
+.priority-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.priority-low    { background: var(--color-priority-low); }
+.priority-medium { background: var(--color-priority-medium); }
+.priority-high   { background: var(--color-priority-high); }
 
 /* ── Animations ── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.96); }
-  to   { opacity: 1; transform: scale(1); }
-}
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%       { opacity: 0.5; transform: scale(0.8); }
-}
-@keyframes shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
+.animate-fade-in { animation: fadeIn 0.12s ease forwards; }
 
-.animate-fade-up   { animation: fadeUp 0.2s ease forwards; }
-.animate-fade-in   { animation: fadeIn 0.15s ease forwards; }
-.animate-slide-down{ animation: slideDown 0.18s cubic-bezier(0.16,1,0.3,1) forwards; }
-.animate-scale-in  { animation: scaleIn 0.18s cubic-bezier(0.16,1,0.3,1) forwards; }
-.animate-pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
-
-/* ── Skeleton loader ── */
+/* ── Skeleton ── */
 .skeleton {
-  background: linear-gradient(90deg,
-    var(--color-surface-2) 25%,
-    var(--color-surface-3) 50%,
-    var(--color-surface-2) 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+  border-radius: var(--radius-xs);
 }
 
 /* ── Avatar ── */
 .avatar {
-  border-radius: 50%;
+  border-radius: var(--radius-xs);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-mono);
   font-weight: 600;
   flex-shrink: 0;
-  border: 1.5px solid var(--color-border);
+  border: 1px solid var(--color-border);
   background: var(--color-surface-3);
   color: var(--color-text-secondary);
   font-size: 10px;
@@ -315,98 +281,16 @@ body {
   color: var(--color-accent);
 }
 
-/* ── Priority dot ── */
-.priority-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.priority-low    { background: var(--color-priority-low); }
-.priority-medium { background: var(--color-priority-medium); }
-.priority-high   { background: var(--color-priority-high); box-shadow: 0 0 5px rgba(224,82,82,0.5); }
-
-/* ── Status pill ── */
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 8px;
-  border-radius: var(--radius-sm);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-.status-todo       { background: var(--color-status-todo-bg);       color: var(--color-status-todo); }
-.status-inprogress { background: var(--color-status-inprogress-bg); color: var(--color-status-inprogress); }
-.status-inreview   { background: var(--color-status-inreview-bg);   color: var(--color-status-inreview); }
-.status-done       { background: var(--color-status-done-bg);       color: var(--color-status-done); }
-
-/* ── Kanban board noise texture overlay on base ── */
-.board-bg {
-  background-color: var(--color-base);
-  background-image: radial-gradient(ellipse at 20% 50%, rgba(47,158,111,0.03) 0%, transparent 60%),
-                    radial-gradient(ellipse at 80% 20%, rgba(59,130,196,0.03) 0%, transparent 60%);
-}
-
-/* ── Column drop zone pulse ── */
-@keyframes dropZonePulse {
-  0%, 100% { box-shadow: 0 0 0 0 var(--color-accent-glow); }
-  50%       { box-shadow: 0 0 0 4px var(--color-accent-glow); }
-}
-.drop-active {
-  animation: dropZonePulse 1s ease-in-out infinite;
-}
-
-/* ── Kanban card drag ── */
-.card-dragging {
-  box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.4) !important;
-  transform: rotate(1.5deg) scale(1.02) !important;
-  border-color: var(--color-accent) !important;
-  z-index: 999;
-}
-
-/* ── Tooltip ── */
-.tooltip {
-  position: relative;
-}
-.tooltip::after {
-  content: attr(data-tip);
-  position: absolute;
-  bottom: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--color-surface-3);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border-bright);
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
-  font-size: 11px;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-  z-index: 50;
-  box-shadow: var(--shadow-md);
-}
-.tooltip:hover::after { opacity: 1; }
-
 /* ── Progress bar ── */
 .progress-track {
   height: 3px;
-  background: var(--color-border);
-  border-radius: 2px;
+  background: var(--color-surface-3);
+  border-radius: 1.5px;
   overflow: hidden;
 }
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-accent-dim), var(--color-accent));
-  border-radius: 2px;
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* ── Selection highlight ── */
-::selection {
-  background: var(--color-accent-subtle);
-  color: var(--color-text-primary);
+  background: var(--color-accent);
+  border-radius: 1.5px;
+  transition: width 0.3s ease;
 }
