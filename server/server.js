@@ -1,5 +1,7 @@
 require('dotenv').config();
 const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 const cors = require('cors');
 const mongoose = require('mongoose');
 
@@ -52,6 +54,75 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Create HTTP server & Socket.io server
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  },
+});
+
+// Real-Time Socket Rooms & Active Presence Tracker
+const projectPresence = new Map(); // projectId -> Map(socketId -> userData)
+
+io.on('connection', (socket) => {
+  let currentProject = null;
+  let currentUser = null;
+
+  socket.on('join_project', ({ projectId, user }) => {
+    if (!projectId) return;
+    currentProject = projectId;
+    currentUser = user;
+
+    socket.join(`project_${projectId}`);
+
+    if (!projectPresence.has(projectId)) {
+      projectPresence.set(projectId, new Map());
+    }
+    if (user) {
+      projectPresence.get(projectId).set(socket.id, user);
+    }
+
+    // Broadcast updated active presence list to room
+    const activeUsers = Array.from(projectPresence.get(projectId).values());
+    io.to(`project_${projectId}`).emit('presence_update', activeUsers);
+  });
+
+  socket.on('leave_project', ({ projectId }) => {
+    socket.leave(`project_${projectId}`);
+    if (projectPresence.has(projectId)) {
+      projectPresence.get(projectId).delete(socket.id);
+      const activeUsers = Array.from(projectPresence.get(projectId).values());
+      io.to(`project_${projectId}`).emit('presence_update', activeUsers);
+    }
+  });
+
+  socket.on('task_moved', ({ projectId, task }) => {
+    socket.to(`project_${projectId}`).emit('task_moved', task);
+  });
+
+  socket.on('task_created', ({ projectId, task }) => {
+    socket.to(`project_${projectId}`).emit('task_created', task);
+  });
+
+  socket.on('task_updated', ({ projectId, task }) => {
+    socket.to(`project_${projectId}`).emit('task_updated', task);
+  });
+
+  socket.on('task_deleted', ({ projectId, taskId }) => {
+    socket.to(`project_${projectId}`).emit('task_deleted', taskId);
+  });
+
+  socket.on('disconnect', () => {
+    if (currentProject && projectPresence.has(currentProject)) {
+      projectPresence.get(currentProject).delete(socket.id);
+      const activeUsers = Array.from(projectPresence.get(currentProject).values());
+      io.to(`project_${currentProject}`).emit('presence_update', activeUsers);
+    }
+  });
+});
+
 // Standalone local execution
 if (require.main === module) {
   const PORT = process.env.PORT || 5000;
@@ -59,8 +130,8 @@ if (require.main === module) {
     .connect(process.env.MONGO_URI)
     .then(() => {
       console.log('✅ Connected to MongoDB');
-      app.listen(PORT, () => {
-        console.log(`🚀 Server running on port ${PORT}`);
+      server.listen(PORT, () => {
+        console.log(`🚀 Server & WebSockets running on port ${PORT}`);
       });
     })
     .catch((err) => {
