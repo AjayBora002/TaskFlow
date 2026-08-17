@@ -1,8 +1,130 @@
 import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { Trash2, Send, MessageSquare } from 'lucide-react';
+import { Trash2, Send, MessageSquare, Code, Copy, Check } from 'lucide-react';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+
+function FormattedCommentText({ text }) {
+  const [copiedIndex, setCopiedIndex] = useState(null);
+
+  // Parse markdown code blocks (```lang ... ```) and inline code (`...`)
+  const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = codeBlockRegex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push({ type: 'text', content: text.slice(lastIndex, match.index) });
+    }
+    parts.push({
+      type: 'codeblock',
+      language: match[1] || 'code',
+      content: match[2].trim(),
+    });
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push({ type: 'text', content: text.slice(lastIndex) });
+  }
+
+  const handleCopy = (code, idx) => {
+    navigator.clipboard.writeText(code);
+    setCopiedIndex(idx);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      {parts.map((part, idx) => {
+        if (part.type === 'codeblock') {
+          const isCopied = copiedIndex === idx;
+          return (
+            <div
+              key={idx}
+              style={{
+                borderRadius: '8px',
+                background: '#1A1D24',
+                border: '1px solid #2A2F3D',
+                overflow: 'hidden',
+                margin: '4px 0',
+                fontFamily: 'var(--font-mono)',
+              }}
+            >
+              {/* Code block header */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '6px 12px',
+                  background: '#12141A',
+                  borderBottom: '1px solid #2A2F3D',
+                  fontSize: '11px',
+                  color: '#8A92A6',
+                }}
+              >
+                <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 600, textTransform: 'lowercase' }}>
+                  <Code size={12} />
+                  {part.language}
+                </span>
+                <button
+                  onClick={() => handleCopy(part.content, idx)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    background: 'transparent',
+                    border: 'none',
+                    color: isCopied ? '#5F8F67' : '#8A92A6',
+                    cursor: 'pointer',
+                    fontSize: '11px',
+                    fontFamily: 'var(--font-sans)',
+                  }}
+                >
+                  {isCopied ? <Check size={12} /> : <Copy size={12} />}
+                  {isCopied ? 'Copied' : 'Copy'}
+                </button>
+              </div>
+
+              {/* Code content */}
+              <pre
+                style={{
+                  margin: 0,
+                  padding: '12px',
+                  fontSize: '12px',
+                  lineHeight: 1.5,
+                  color: '#E2E8F0',
+                  overflowX: 'auto',
+                  whiteSpace: 'pre',
+                }}
+              >
+                <code>{part.content}</code>
+              </pre>
+            </div>
+          );
+        }
+
+        return (
+          <p
+            key={idx}
+            style={{
+              margin: 0,
+              fontSize: '13px',
+              color: 'var(--color-text-primary)',
+              lineHeight: 1.55,
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+            }}
+          >
+            {part.content}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function CommentThread({ taskId, projectId, comments, onCommentAdded, onCommentDeleted }) {
   const { user } = useAuth();
@@ -52,7 +174,7 @@ export default function CommentThread({ taskId, projectId, comments, onCommentAd
             letterSpacing: '0.06em',
           }}
         >
-          Discussion
+          Discussion & Code Snippets
         </h3>
         <span className="badge badge-muted">
           {comments.length}
@@ -60,7 +182,7 @@ export default function CommentThread({ taskId, projectId, comments, onCommentAd
       </div>
 
       {/* Comment List */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
         {comments.length === 0 ? (
           <div
             style={{
@@ -68,68 +190,58 @@ export default function CommentThread({ taskId, projectId, comments, onCommentAd
               textAlign: 'center',
               background: 'var(--color-surface)',
               border: '1px dashed var(--color-border)',
-              borderRadius: 'var(--radius-lg)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--color-text-muted)',
+              fontSize: '12.5px',
             }}
           >
-            <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: 0 }}>
-              No comments yet. Start the conversation below.
-            </p>
+            No comments or code snippets shared yet. Start the conversation below!
           </div>
         ) : (
           comments.map((c) => (
             <div
               key={c._id}
-              className="animate-fade-in card"
               style={{
                 display: 'flex',
                 gap: '12px',
-                alignItems: 'flex-start',
-                padding: '14px 16px',
+                padding: '14px',
                 background: 'var(--color-surface)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-md)',
+                boxShadow: 'var(--shadow-sm)',
               }}
             >
-              {/* Author Avatar */}
               <div
-                className="avatar"
-                style={{ width: '28px', height: '28px', fontSize: '9.5px', marginTop: '2px' }}
+                className="avatar avatar-accent"
+                style={{ width: '28px', height: '28px', fontSize: '10px', marginTop: '2px' }}
               >
                 {getInitials(c.author?.name)}
               </div>
 
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-                      {c.author?.name}
+                    <span style={{ fontSize: '12.5px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                      {c.author?.name || 'Teammate'}
                     </span>
                     <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
-                      {formatDistanceToNow(new Date(c.createdAt), { addSuffix: true })}
+                      {c.createdAt ? formatDistanceToNow(new Date(c.createdAt), { addSuffix: true }) : 'just now'}
                     </span>
                   </div>
 
-                  {String(c.author?._id) === String(user?._id) && (
+                  {(c.author?._id === user?.id || user?.id === c.author) && (
                     <button
                       onClick={() => handleDelete(c._id)}
-                      title="Delete comment"
                       className="btn-icon"
-                      style={{ padding: '3px' }}
+                      title="Delete comment"
+                      style={{ color: 'var(--color-danger)', opacity: 0.7 }}
                     >
-                      <Trash2 size={13} style={{ color: 'var(--color-danger)' }} />
+                      <Trash2 size={13} />
                     </button>
                   )}
                 </div>
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: '13px',
-                    color: 'var(--color-text-primary)',
-                    lineHeight: 1.55,
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-word',
-                  }}
-                >
-                  {c.body}
-                </p>
+
+                <FormattedCommentText text={c.body} />
               </div>
             </div>
           ))
@@ -141,7 +253,7 @@ export default function CommentThread({ taskId, projectId, comments, onCommentAd
         <div
           style={{
             border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-lg)',
+            borderRadius: 'var(--radius-md)',
             background: 'var(--color-surface)',
             overflow: 'hidden',
             boxShadow: 'var(--shadow-sm)',
@@ -152,7 +264,7 @@ export default function CommentThread({ taskId, projectId, comments, onCommentAd
             id="comment-input"
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            placeholder="Write a comment or update..."
+            placeholder="Write a comment or paste code snippet (use ```js for syntax formatting)..."
             rows={3}
             style={{
               width: '100%',
@@ -172,40 +284,38 @@ export default function CommentThread({ taskId, projectId, comments, onCommentAd
               }
             }}
           />
+
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '8px 14px',
+              padding: '8px 12px',
+              borderTop: '1px solid var(--color-border-subtle)',
               background: 'var(--color-surface-2)',
-              borderTop: '1px solid var(--color-border)',
             }}
           >
             <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
-              Press Ctrl + Enter to post
+              Tip: Use ```js ... ``` for code formatting. Press Cmd+Enter to send.
             </span>
+
             <button
-              id="btn-submit-comment"
+              id="btn-post-comment"
               type="submit"
               disabled={submitting || !body.trim()}
               className="btn btn-primary"
-              style={{
-                opacity: body.trim() ? 1 : 0.5,
-                cursor: body.trim() ? 'pointer' : 'not-allowed',
-                padding: '5px 12px',
-                fontSize: '12px',
-              }}
+              style={{ padding: '5px 12px', fontSize: '12px' }}
             >
               <Send size={13} />
-              {submitting ? 'Posting...' : 'Comment'}
+              {submitting ? 'Posting...' : 'Post Update'}
             </button>
           </div>
         </div>
-        {error && (
-          <p style={{ margin: '8px 0 0', fontSize: '12px', color: 'var(--color-danger)' }}>{error}</p>
-        )}
       </form>
+
+      {error && (
+        <p style={{ margin: '8px 0 0', fontSize: '12px', color: 'var(--color-danger)' }}>{error}</p>
+      )}
     </div>
   );
 }
