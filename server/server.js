@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 
+const { securityHeaders, sanitizeNoSql, apiLimiter } = require('./middleware/security');
+
 const authRoutes = require('./routes/auth');
 const projectRoutes = require('./routes/projects');
 const taskRoutes = require('./routes/tasks');
@@ -12,12 +14,19 @@ const aiRoutes = require('./routes/ai');
 
 const app = express();
 
+// Security Headers & Input Sanitization
+app.use(securityHeaders);
+app.use(sanitizeNoSql);
+
 // Middleware
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true,
 }));
-app.use(express.json());
+app.use(express.json({ limit: '10kb' })); // Limit JSON body payload size
+
+// Apply global API Rate Limiter
+app.use('/api', apiLimiter);
 
 // Routes
 app.use('/api/auth', authRoutes);
