@@ -1,94 +1,111 @@
-# TaskFlow
+# 🚀 TaskFlow
 
-A focused project & task management tool for small teams. Built with React (Vite) + Node.js/Express + MongoDB.
-
-## Quick Start
-
-### Prerequisites
-- Node.js 18+
-- MongoDB Atlas account (or local MongoDB)
-
-### 1. Set up the server
-
-```bash
-cd server
-npm install
-cp .env.example .env
-# Edit .env — set your MONGO_URI and JWT_SECRET
-```
-
-### 2. Set up the client
-
-```bash
-cd client
-npm install
-```
-
-### 3. Run in development
-
-**Terminal 1 — Server:**
-```bash
-cd server
-npm run dev   # starts on :5000
-```
-
-**Terminal 2 — Client:**
-```bash
-cd client
-npm run dev   # starts on :5173, proxies /api to :5000
-```
-
-### 4. Seed demo data (optional)
-
-With the server running and `.env` configured:
-```bash
-cd server
-npm run seed
-```
-
-Demo credentials:
-- `alex@taskflow.dev` / `password123`
-- `jamie@taskflow.dev` / `password123`
+A modern, full-stack, AI-powered project & task management platform for teams. Built with React (Vite), Node.js, Express, MongoDB, WebSockets, and Google Gemini AI.
 
 ---
 
-## Deployment
+## ✨ Features
 
-### Backend → Render
-1. Connect your GitHub repo to Render
-2. Set build command: `npm install`
-3. Set start command: `node server.js`
-4. Add env vars: `MONGO_URI`, `JWT_SECRET`, `CLIENT_URL` (your Vercel URL), `PORT=10000`
+### 📋 Kanban Board & Task Management
+- **Visual Drag & Drop**: Fluid task movement across `To Do`, `In Progress`, `In Review`, and `Done` columns.
+- **Enforced Workflow Rules**: Prevents invalid status jumps (e.g. `To Do` directly to `Done`).
+- **Rich Task Metadata**: Priorities (`Low`, `Medium`, `High`, `Urgent`), assignees, due dates, and rich descriptions.
+- **Celebration Effects**: Confetti animations on task completion.
 
-### Frontend → Vercel
-1. Connect your GitHub repo to Vercel
-2. Set root directory to `client`
-3. Build command: `npm run build`
-4. Output directory: `dist`
-5. Add env var: `VITE_API_URL` (your Render service URL, if not using proxy)
+### ⚡ Real-Time Collaboration
+- **WebSockets (Socket.io)**: Live task movements, updates, and creation across connected team members.
+- **Active Presence**: Room-based presence indicators showing online colleagues on the project board.
 
-> **Note for production**: Update `client/src/api/axios.js` to use `import.meta.env.VITE_API_URL` as the `baseURL` instead of the `/api` proxy path.
+### 🤖 AI-Powered Productivity (Google Gemini)
+- **AI Copilot & Command Bar**: Natural language prompt assistant to break down complex goals into actionable tasks.
+- **AI Audit Panel**: Automated risk detection, workload imbalance warnings, and bottleneck insights.
+- **AI Daily Digest**: Smart project summaries highlighting completed milestones and urgent priorities.
+
+### 👥 Team & Access Control
+- **Member Management**: Invite colleagues by email and manage team access.
+- **Role-Based Controls**: Project owner vs team member permissions for settings, invitations, and project deletion.
+
+### 🔒 Security & Performance
+- **JWT Authentication**: Secure token-based user authentication.
+- **Security Headers & Sanitization**: Helmet headers, NoSQL query sanitization (`express-mongo-sanitize`), and rate limiting (`express-rate-limit`).
 
 ---
 
-## Features
+## 🛠️ Tech Stack
 
-- **Auth** — JWT-based register/login, protected routes
-- **Projects** — create, list, add/remove members by email
-- **Tasks** — create/edit/delete with title, description, assignee, priority, due date, status
-- **Kanban board** — drag-and-drop with enforced status transitions (To Do → In Progress → In Review → Done)
-- **Comments** — threaded comments on task detail view
-- **Notifications** — in-app bell with 15s polling, mark as read
-- **Dashboard** — per-project stats via MongoDB aggregation pipeline
+- **Frontend**: React 19, Vite, Tailwind CSS, `@hello-pangea/dnd`, Lucide Icons, Canvas Confetti.
+- **Backend**: Node.js, Express, Mongoose (MongoDB Atlas), Socket.io, JWT, Helmet.
+- **AI Engine**: Google Gemini API (`@google/genai`).
+- **Deployment**: Vercel Serverless Function (`api/index.js`) & Static Build (`client/dist`).
 
-## Status Transition Rules
-Tasks must advance through each stage. You cannot jump from **To Do → Done** directly. Allowed transitions:
-- To Do → In Progress ✓
-- In Progress → In Review ✓  
-- In Review → Done ✓
-- Any backward step ✓ (regression allowed)
+---
 
-## Design
-- Palette: graphite/slate base (`#1C2128`) + teal accent (`#2F9E6F`)
-- Fonts: DM Sans (UI) + JetBrains Mono (metadata)
-- Signature detail: 3px left status stripe on every task card
+## 🚀 Quick Start
+
+### 1. Prerequisites
+- Node.js (v18+)
+- MongoDB Atlas database URI
+- Google Gemini API Key (optional, for AI features)
+
+### 2. Environment Setup
+
+Create `.env` files in both root/server and client:
+
+**`server/.env`**:
+```env
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+### 3. Installation
+
+Install dependencies for root, server, and client:
+
+```bash
+# Root directory
+npm install
+
+# Client directory
+cd client && npm install
+
+# Server directory
+cd ../server && npm install
+```
+
+### 4. Running Locally
+
+**Terminal 1 — Backend Server:**
+```bash
+cd server
+npm run dev
+```
+
+**Terminal 2 — Frontend App:**
+```bash
+cd client
+npm run dev
+```
+
+Visit `http://localhost:5173` in your browser.
+
+---
+
+## 🌐 Deployment (Vercel)
+
+TaskFlow is configured for full-stack zero-config deployment on Vercel using [`vercel.json`](file:///d:/TaskFlow/vercel.json).
+
+### Steps to Deploy:
+1. Push your repository to GitHub.
+2. Import your repository into **Vercel**.
+3. Add Environment Variables in Vercel settings:
+   - `MONGO_URI`
+   - `JWT_SECRET`
+   - `GEMINI_API_KEY`
+4. Deploy! Vercel automatically builds the frontend SPA and exposes the Node.js serverless functions under `/api/*`.
+
+---
+
+## 📄 License
+[MIT](LICENSE)
