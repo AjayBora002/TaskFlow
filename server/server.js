@@ -1,9 +1,15 @@
 require('dotenv').config();
 const express = require('express');
 const http = require('http');
-const { Server } = require('socket.io');
 const cors = require('cors');
 const mongoose = require('mongoose');
+
+let Server = null;
+try {
+  Server = require('socket.io').Server;
+} catch (e) {
+  console.warn('socket.io module loading deferred/skipped in serverless mode');
+}
 
 const { securityHeaders, sanitizeNoSql, apiLimiter } = require('./middleware/security');
 
@@ -56,17 +62,21 @@ app.use((err, req, res, next) => {
 
 // Create HTTP server & Socket.io server
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  },
-});
+let io = null;
+if (Server) {
+  io = new Server(server, {
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    },
+  });
+}
 
 // Real-Time Socket Rooms & Active Presence Tracker
 const projectPresence = new Map(); // projectId -> Map(socketId -> userData)
 
-io.on('connection', (socket) => {
+if (io) {
+  io.on('connection', (socket) => {
   let currentProject = null;
   let currentUser = null;
 
@@ -122,6 +132,7 @@ io.on('connection', (socket) => {
     }
   });
 });
+}
 
 // Standalone local execution
 if (require.main === module) {
