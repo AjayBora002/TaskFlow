@@ -44,12 +44,24 @@ function getAvatarStyle(name) {
   return { background: AVATAR_COLORS[index].bg, color: AVATAR_COLORS[index].color };
 }
 
+function getInitials(name) {
+  if (!name) return '?';
+  return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function getOwnerId(project) {
+  if (!project || !project.owner) return null;
+  return typeof project.owner === 'object' ? project.owner._id : project.owner;
+}
+
 export default function ProjectBoard() {
   const { projectId } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
 
   const [project, setProject] = useState(null);
+  const ownerId = getOwnerId(project);
+  const isOwner = Boolean(user?._id && ownerId && String(user._id) === String(ownerId));
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [transitonError, setTransitionError] = useState('');
@@ -780,9 +792,9 @@ export default function ProjectBoard() {
               {/* Members section */}
               <div>
                 <span className="field-label" style={{ marginBottom: '8px' }}>
-                  Team Members ({project.members?.length})
+                  Team Members ({project.members?.length || 0})
                 </span>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
                   {project.members?.map((m) => (
                     <div
                       key={m._id}
@@ -790,7 +802,7 @@ export default function ProjectBoard() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        padding: '6px 10px',
+                        padding: '8px 10px',
                         background: 'var(--color-surface-2)',
                         borderRadius: 'var(--radius-xs)',
                         fontSize: '12px',
@@ -799,23 +811,26 @@ export default function ProjectBoard() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div
                           className="avatar"
-                          style={{ width: '22px', height: '22px', fontSize: '9px', ...getAvatarStyle(m.name) }}
+                          style={{ width: '24px', height: '24px', fontSize: '10px', ...getAvatarStyle(m.name) }}
                         >
                           {getInitials(m.name)}
                         </div>
-                        <span style={{ color: 'var(--color-text-primary)', fontWeight: 600 }}>{m.name}</span>
-                        {m._id === project.owner && (
-                          <span className="badge badge-accent" style={{ fontSize: '10px' }}>Owner</span>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ color: 'var(--color-text-primary)', fontWeight: 600, lineHeight: 1.2 }}>{m.name}</span>
+                          {m.email && <span style={{ color: 'var(--color-text-tertiary)', fontSize: '10px' }}>{m.email}</span>}
+                        </div>
+                        {String(m._id) === String(ownerId) && (
+                          <span className="badge badge-accent" style={{ fontSize: '10px', marginLeft: '4px' }}>Owner</span>
                         )}
                       </div>
 
-                      {user?._id === project.owner && m._id !== project.owner && (
+                      {isOwner && String(m._id) !== String(ownerId) && (
                         <button
                           onClick={() => handleRemoveMember(m._id)}
                           className="btn-icon"
                           title="Remove member"
                         >
-                          <X size={13} />
+                          <X size={14} />
                         </button>
                       )}
                     </div>
@@ -823,28 +838,37 @@ export default function ProjectBoard() {
                 </div>
 
                 {/* Add member form */}
-                {user?._id === project.owner && (
-                  <form onSubmit={handleAddMember} style={{ display: 'flex', gap: '6px' }}>
-                    <input
-                      type="email"
-                      required
-                      value={memberEmail}
-                      onChange={(e) => setMemberEmail(e.target.value)}
-                      placeholder="Colleague email..."
-                      className="input"
-                      style={{ fontSize: '12px' }}
-                    />
-                    <button type="submit" disabled={addingMember} className="btn btn-ghost" style={{ fontSize: '12px' }}>
-                      <UserPlus size={13} />
-                      Add
-                    </button>
-                  </form>
+                {isOwner ? (
+                  <div>
+                    <span className="field-label" style={{ marginBottom: '6px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      Add New Member
+                    </span>
+                    <form onSubmit={handleAddMember} style={{ display: 'flex', gap: '6px' }}>
+                      <input
+                        type="email"
+                        required
+                        value={memberEmail}
+                        onChange={(e) => setMemberEmail(e.target.value)}
+                        placeholder="Colleague email..."
+                        className="input"
+                        style={{ fontSize: '12px', flex: 1 }}
+                      />
+                      <button type="submit" disabled={addingMember} className="btn btn-primary" style={{ fontSize: '12px', padding: '6px 12px', whiteSpace: 'nowrap' }}>
+                        <UserPlus size={13} />
+                        {addingMember ? 'Adding...' : 'Add'}
+                      </button>
+                    </form>
+                  </div>
+                ) : (
+                  <p style={{ margin: '4px 0 0', fontSize: '11px', color: 'var(--color-text-tertiary)' }}>
+                    Only the project owner can invite or remove members.
+                  </p>
                 )}
-                {memberError && <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--color-danger)' }}>{memberError}</p>}
+                {memberError && <p style={{ margin: '6px 0 0', fontSize: '12px', color: 'var(--color-danger)' }}>{memberError}</p>}
               </div>
 
               {/* Danger Zone */}
-              {user?._id === project.owner && (
+              {isOwner && (
                 <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '14px' }}>
                   <span className="field-label" style={{ color: 'var(--color-danger)', marginBottom: '8px' }}>
                     Danger Zone
