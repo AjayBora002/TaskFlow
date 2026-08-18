@@ -1,5 +1,12 @@
 const mongoose = require('mongoose');
-const app = require('../server/server');
+
+let app;
+try {
+  app = require('../server/server');
+} catch (loadErr) {
+  console.error('❌ Failed to load server module:', loadErr.message, loadErr.stack);
+  app = (req, res) => res.status(500).json({ message: `Server module load error: ${loadErr.message}` });
+}
 
 let cached = global.mongoose;
 
@@ -39,7 +46,7 @@ module.exports = async (req, res) => {
   try {
     await connectDB();
   } catch (err) {
-    console.error('❌ Vercel Serverless Database Connection Error:', err.message);
+    console.error('❌ Vercel DB Connection Error:', err.message);
     return res.status(500).json({
       message: `Database Connection Error: ${err.message}. Please check MongoDB Atlas Network Access IP Whitelist (0.0.0.0/0).`,
     });
