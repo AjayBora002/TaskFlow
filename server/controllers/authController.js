@@ -1,8 +1,10 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+const JWT_SECRET = process.env.JWT_SECRET || 'taskflow_default_jwt_secret_key_2026_change_in_prod';
+
 const signToken = (id) =>
-  jwt.sign({ id }, process.env.JWT_SECRET, {
+  jwt.sign({ id }, JWT_SECRET, {
     expiresIn: '7d',
     algorithm: 'HS256',
   });
@@ -91,7 +93,8 @@ exports.login = async (req, res) => {
     const token = signToken(user._id);
     res.json({ token, user });
   } catch (err) {
-    res.status(500).json({ message: 'Server error during login' });
+    console.error('Login Error Details:', err);
+    res.status(500).json({ message: err.message || 'Server error during login' });
   }
 };
 

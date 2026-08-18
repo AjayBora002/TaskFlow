@@ -29,8 +29,22 @@ const verifyStateToken = (state, provider) => {
   return meta.provider === provider;
 };
 
+const JWT_SECRET = process.env.JWT_SECRET || 'taskflow_default_jwt_secret_key_2026_change_in_prod';
+
+const getClientUrl = (req) => {
+  if (process.env.CLIENT_URL) return process.env.CLIENT_URL;
+  if (req.headers.origin) return req.headers.origin;
+  if (req.headers.referer) {
+    try {
+      const parsed = new URL(req.headers.referer);
+      return parsed.origin;
+    } catch (e) {}
+  }
+  return `${req.protocol}://${req.headers.host}`;
+};
+
 const signToken = (id) =>
-  jwt.sign({ id }, process.env.JWT_SECRET, {
+  jwt.sign({ id }, JWT_SECRET, {
     expiresIn: '7d',
     algorithm: 'HS256',
   });
@@ -52,7 +66,7 @@ exports.githubLogin = (req, res) => {
 };
 
 exports.githubCallback = async (req, res) => {
-  const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+  const clientUrl = getClientUrl(req);
   try {
     const { code, state } = req.query;
 
@@ -129,7 +143,7 @@ exports.linkedinLogin = (req, res) => {
 };
 
 exports.linkedinCallback = async (req, res) => {
-  const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+  const clientUrl = getClientUrl(req);
   try {
     const { code, state } = req.query;
 

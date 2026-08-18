@@ -25,7 +25,7 @@ app.use(sanitizeNoSql);
 
 // Middleware
 app.use(cors({
-  origin: '*',
+  origin: true,
   credentials: true,
 }));
 app.use(express.json({ limit: '10kb' })); // Limit JSON body payload size
