@@ -5,9 +5,10 @@ const mongoSanitize = require('express-mongo-sanitize');
 // Brute-force protection for login / register endpoints
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // Max 10 login/register requests per IP per 15 min
+  max: 30, // Max 30 login/register requests per IP per 15 min
   standardHeaders: true,
   legacyHeaders: false,
+  validate: false,
   message: {
     message: 'Too many authentication attempts from this IP. Please try again after 15 minutes.',
   },
@@ -19,6 +20,7 @@ const apiLimiter = rateLimit({
   max: 300, // Max 300 requests per IP per 15 min
   standardHeaders: true,
   legacyHeaders: false,
+  validate: false,
   message: {
     message: 'Too many requests sent from this IP. Please slow down.',
   },
