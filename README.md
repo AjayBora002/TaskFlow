@@ -2,6 +2,13 @@
 
 A modern, full-stack, AI-powered project & task management platform for teams. Built with React (Vite), Node.js, Express, MongoDB, WebSockets, and Google Gemini AI.
 
+![React](https://img.shields.io/badge/React-19-blue?logo=react)
+![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite)
+![Node.js](https://img.shields.io/badge/Node.js-Express-339933?logo=nodedotjs)
+![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb)
+![Google Gemini](https://img.shields.io/badge/Google%20Gemini-AI-8E75B2?logo=google)
+![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?logo=vercel)
+
 ---
 
 ## ✨ Features
