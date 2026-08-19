@@ -181,3 +181,43 @@ exports.reorderTasks = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.moveTask = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const { newStatus, newOrder } = req.body;
+
+    const task = await Task.findById(taskId).populate('project', 'members');
+    if (!task) return res.status(404).json({ message: 'Task not found' });
+
+    const isMember = task.project.members.map(String).includes(String(req.user._id));
+    if (!isMember) return res.status(403).json({ message: 'Access denied' });
+
+    if (newStatus && newStatus !== task.status) {
+      const allowed = Task.VALID_TRANSITIONS[task.status] || [];
+      if (!allowed.includes(newStatus)) {
+        return res.status(400).json({
+          message: `Cannot move task from "${task.status}" to "${newStatus}". Invalid transition.`,
+          currentStatus: task.status,
+          allowedTransitions: allowed,
+        });
+      }
+      task.status = newStatus;
+    }
+
+    if (newOrder !== undefined) {
+      task.order = newOrder;
+    }
+
+    await task.save();
+    await task.populate('assignee reporter', 'name email');
+
+    res.json(task);
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ message: Object.values(err.errors).map((e) => e.message).join(', ') });
+    }
+    res.status(500).json({ message: err.message });
+  }
+};
+

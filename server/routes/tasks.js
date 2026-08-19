@@ -8,6 +8,7 @@ const {
   updateTask,
   deleteTask,
   reorderTasks,
+  moveTask,
 } = require('../controllers/taskController');
 
 router.use(auth);
@@ -18,6 +19,7 @@ router.post('/', createTask);
 router.put('/reorder', reorderTasks);
 router.get('/:taskId', getTask);
 router.put('/:taskId', updateTask);
+router.patch('/:taskId/move', moveTask);
 router.delete('/:taskId', deleteTask);
 
 module.exports = router;
